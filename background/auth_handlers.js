@@ -73,6 +73,7 @@ export async function handleStoreAuthToken(payload) {
         }
 
         startAutoSync();
+        startProactiveRefreshTimer();
 
         chrome.runtime.sendMessage({ type: 'AUTH_STATE_CHANGED', authenticated: true })
             .catch(() => { });
@@ -114,7 +115,7 @@ export async function handleGoogleSignIn() {
         const queryParams = new URLSearchParams(urlObj.search);
 
         const accessToken = hashParams.get('access_token') || queryParams.get('access_token');
-        const refreshToken = hashParams.get('refresh_token') || queryParams.get('refresh_token');
+        let refreshToken = hashParams.get('refresh_token') || queryParams.get('refresh_token');
         const expiresIn = parseInt(hashParams.get('expires_in') || queryParams.get('expires_in') || '3600');
         console.log('[DEBUG-AUTH-LOGIN] OAuth callback parsed:');
         console.log('[DEBUG-AUTH-LOGIN]   accessToken:', accessToken ? `exists (${accessToken.substring(0, 30)}...)` : 'NULL');
@@ -169,18 +170,35 @@ export async function handleGoogleSignIn() {
         }
 
         // CRITICAL: Sync OAuth tokens INTO Supabase client — single source of truth
-        try {
-            const { error: setErr } = await supabase.auth.setSession({
-                access_token: accessToken,
-                refresh_token: refreshToken,
-            });
-            if (setErr) {
-                console.warn('[DEBUG-AUTH-LOGIN] supabase.auth.setSession error:', setErr.message);
-            } else {
-                console.log('[DEBUG-AUTH-LOGIN] ✅ Synced OAuth tokens into Supabase client');
+        // Guard: only call setSession if we have refresh_token to avoid corrupting existing session
+        if (refreshToken) {
+            try {
+                const { error: setErr } = await supabase.auth.setSession({
+                    access_token: accessToken,
+                    refresh_token: refreshToken,
+                });
+                if (setErr) {
+                    console.warn('[DEBUG-AUTH-LOGIN] supabase.auth.setSession error:', setErr.message);
+                } else {
+                    console.log('[DEBUG-AUTH-LOGIN] ✅ Synced OAuth tokens into Supabase client');
+                }
+            } catch (e) {
+                console.warn('[DEBUG-AUTH-LOGIN] setSession exception:', e.message);
             }
-        } catch (e) {
-            console.warn('[DEBUG-AUTH-LOGIN] setSession exception:', e.message);
+        } else {
+            console.warn('[DEBUG-AUTH-LOGIN] ⚠️ Skipping setSession — no refresh_token (session will expire in ~1h)');
+            // Still set access_token only so current requests work
+            try {
+                const { error: setErr } = await supabase.auth.setSession({
+                    access_token: accessToken,
+                    refresh_token: '',
+                });
+                if (setErr) {
+                    console.warn('[DEBUG-AUTH-LOGIN] setSession (access-only) error:', setErr.message);
+                }
+            } catch (e) {
+                console.warn('[DEBUG-AUTH-LOGIN] setSession (access-only) exception:', e.message);
+            }
         }
 
         // Store non-auth user data only
@@ -197,6 +215,7 @@ export async function handleGoogleSignIn() {
 
         await updateCachedAuthState();
         startAutoSync();
+        startProactiveRefreshTimer();
 
         setTimeout(() => syncFromCloud(), 1000);
 
@@ -297,6 +316,7 @@ export async function handleAuthSuccess(session) {
         }
 
         startAutoSync();
+        startProactiveRefreshTimer();
 
         setTimeout(() => syncFromCloud(), 1000);
 
@@ -390,12 +410,62 @@ export async function handleLogout() {
     return { success: true };
 }
 
-// DISABLED: Alarm-based proactive refresh không cần thiết trong SW ephemeral context.
-// autoRefreshToken đã tắt (config.js), manual forceRefreshToken() được gọi trước mỗi expensive op.
-// Giữ function stubs để tránh break callers (handleLogout, etc.).
-export async function proactiveTokenRefresh() { /* no-op */ }
-export function startProactiveRefreshTimer() { /* no-op */ }
-export function stopProactiveRefreshTimer() { /* no-op */ }
+// Proactive token refresh using chrome.alarms — survives SW restarts.
+// autoRefreshToken is disabled (config.js) because setInterval dies when SW is killed.
+// chrome.alarms persist across SW lifecycles, ensuring tokens stay fresh.
+const REFRESH_ALARM_NAME = 'fitly-token-refresh';
+const REFRESH_INTERVAL_MINUTES = 10; // Refresh every 10 minutes
+
+export async function proactiveTokenRefresh() {
+    try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.access_token) {
+            console.log('[proactiveTokenRefresh] No session — skipping');
+            return;
+        }
+        const ttl = session.expires_at
+            ? Math.floor((session.expires_at * 1000 - Date.now()) / 1000)
+            : 0;
+        console.log('[proactiveTokenRefresh] Current token TTL:', ttl, 's');
+
+        // Refresh if TTL < 15 minutes (same threshold as forceRefreshToken)
+        if (ttl < 900) {
+            console.log('[proactiveTokenRefresh] TTL < 15 min, refreshing...');
+            const { forceRefreshToken } = await import('./auth_state_manager.js');
+            const freshToken = await forceRefreshToken();
+            if (freshToken) {
+                console.log('[proactiveTokenRefresh] ✅ Token refreshed successfully');
+            } else {
+                console.warn('[proactiveTokenRefresh] ⚠️ Refresh returned null');
+            }
+        } else {
+            console.log('[proactiveTokenRefresh] Token still fresh, no refresh needed');
+        }
+    } catch (error) {
+        console.error('[proactiveTokenRefresh] ❌ Error:', error.message);
+    }
+}
+
+export function startProactiveRefreshTimer() {
+    try {
+        chrome.alarms.create(REFRESH_ALARM_NAME, {
+            delayInMinutes: REFRESH_INTERVAL_MINUTES,
+            periodInMinutes: REFRESH_INTERVAL_MINUTES,
+        });
+        console.log('[startProactiveRefreshTimer] ✅ Alarm created: every', REFRESH_INTERVAL_MINUTES, 'min');
+    } catch (error) {
+        console.error('[startProactiveRefreshTimer] ❌ Failed to create alarm:', error.message);
+    }
+}
+
+export function stopProactiveRefreshTimer() {
+    try {
+        chrome.alarms.clear(REFRESH_ALARM_NAME);
+        console.log('[stopProactiveRefreshTimer] Alarm cleared');
+    } catch (error) {
+        console.warn('[stopProactiveRefreshTimer] Clear alarm failed:', error.message);
+    }
+}
 
 // Re-export from extracted modules for backward compatibility
 export { handleEmailLogin, handleEmailRegister } from './auth_email.js';

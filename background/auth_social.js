@@ -65,6 +65,19 @@ function extractSessionParams(params) {
 async function finalizeSocialLoginSession(session) {
     try {
         // STEP 1: Set session in Supabase client (single source of truth)
+        // If refresh_token is missing, try to recover from existing Supabase session
+        if (session.access_token && !session.refresh_token) {
+            try {
+                const { data: { session: existingSession } } = await supabase.auth.getSession();
+                if (existingSession?.refresh_token) {
+                    session.refresh_token = existingSession.refresh_token;
+                    console.log('[finalizeSocialLoginSession] ✅ Recovered refresh_token from existing session');
+                }
+            } catch (e) {
+                console.warn('[finalizeSocialLoginSession] Could not recover refresh_token:', e.message);
+            }
+        }
+
         if (session.access_token && session.refresh_token) {
             try {
                 await supabase.auth.setSession({
@@ -74,6 +87,8 @@ async function finalizeSocialLoginSession(session) {
             } catch (e) {
                 console.warn('[finalizeSocialLoginSession] setSession failed:', e.message);
             }
+        } else if (session.access_token) {
+            console.warn('[finalizeSocialLoginSession] ⚠️ No refresh_token — session will expire in ~1h');
         }
 
         // STEP 2: Store non-auth user data
