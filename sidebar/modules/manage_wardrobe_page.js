@@ -107,6 +107,10 @@ function renderQuickWardrobeCarousel() {
     const carouselContainer = document.getElementById('quick-wardrobe-carousel');
     if (!carouselContainer) return;
 
+    // Unhide parent container (hidden on logout)
+    const parentContainer = carouselContainer.closest('.quick-wardrobe-carousel-container');
+    if (parentContainer) parentContainer.classList.remove('hidden');
+
     // STEP 1: Filter ALL items, only exclude hidden ones
     const visibleItems = state.recentClothing.filter(item => {
         const itemKey = item.id || item.imageUrl;

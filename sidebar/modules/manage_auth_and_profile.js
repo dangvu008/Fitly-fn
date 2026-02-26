@@ -134,7 +134,12 @@ async function checkAuthState() {
             const modelsGrid = document.getElementById('user-models-grid');
             if (modelsGrid) modelsGrid.innerHTML = '';
             const quickCarousel = document.getElementById('quick-wardrobe-carousel');
-            if (quickCarousel) quickCarousel.innerHTML = '';
+            if (quickCarousel) {
+                quickCarousel.innerHTML = '';
+                // Also hide entire container (parent has title "Lịch sử item đã thử")
+                const carouselContainer = quickCarousel.closest('.quick-wardrobe-carousel-container');
+                if (carouselContainer) carouselContainer.classList.add('hidden');
+            }
             const resultSection = document.getElementById('inline-result-section');
             if (resultSection) resultSection.classList.add('hidden');
             if (typeof updateGalleryUI === 'function') updateGalleryUI();
