@@ -7,7 +7,7 @@
  */
 
 import { supabase } from '../extension/config.js';
-import { isDemoMode, getAuthToken, refreshAuthToken, forceRefreshToken } from './auth_state_manager.js';
+import { isDemoMode, getAuthToken, refreshAuthToken, forceRefreshToken, backupSessionForLongOp } from './auth_state_manager.js';
 import { MOCK_TRYON_RESULTS, demoState, SUPABASE_AUTH_KEY, SUPABASE_AUTH_URL as SUPABASE_URL } from './ENVIRONMENT_CONFIG.js';
 import { handleAddUserModel } from './user_model_manager.js';
 import { handleSaveRecentClothing } from './recent_clothing_manager.js';
@@ -145,6 +145,8 @@ export async function handleProcessTryOn(data) {
         try {
             accessToken = await forceRefreshToken();
             console.log('[DEBUG-BG-TRYON] forceRefreshToken result:', accessToken ? `token exists (${accessToken.substring(0, 30)}...)` : 'NULL');
+            // Backup session before long operation — protects against SW restart mid-process
+            if (accessToken) await backupSessionForLongOp();
         } catch (forceRefreshErr) {
             console.error('[DEBUG-BG-TRYON] ❌ forceRefreshToken threw error:', forceRefreshErr);
             console.error('[DEBUG-BG-TRYON] errorCode:', forceRefreshErr.errorCode);
@@ -310,9 +312,14 @@ export async function handleProcessTryOn(data) {
                 // Retry vẫn fail → KHÔNG xóa tokens, chỉ trả AUTH_EXPIRED
                 if (response.status === 401 || response.status === 403) {
                     const retryBody = await response.json().catch(() => ({}));
-                    console.error('[DEBUG-BG-TRYON] 🔴 RETRY also got', response.status, '— returning AUTH_EXPIRED (tokens preserved)');
+                    console.error('[DEBUG-BG-TRYON] 🔴 RETRY also got', response.status, '— returning AUTH_EXPIRED');
                     console.error('[DEBUG-BG-TRYON] Retry error body:', JSON.stringify(retryBody));
                     log('[handleProcessTryOn] Retry auth failed, body:', retryBody);
+                    // Clear stale session — double 401 means token is irrecoverably invalid
+                    try {
+                        await supabase.auth.signOut({ scope: 'local' });
+                        console.log('[DEBUG-BG-TRYON] Cleared stale session after double 401');
+                    } catch (_) { /* ignore */ }
                     return {
                         success: false,
                         error: 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.',

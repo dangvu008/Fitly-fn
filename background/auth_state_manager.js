@@ -193,28 +193,45 @@ async function _doRefresh() {
 
     // ATTEMPT 2: Storage rescue — session may exist in storage but not in memory
     // This happens when SW restarts or when Supabase internally wipes in-memory session
+    const rescueResult = await _tryStorageRescue('fitly-auth-token', 'primary storage');
+    if (rescueResult) return rescueResult;
+
+    // ATTEMPT 3: Backup rescue — Supabase may have wiped fitly-auth-token during failed refresh.
+    // fitly-auth-backup is a separate copy saved before long operations (try-on).
+    const backupResult = await _tryStorageRescue('fitly-auth-backup', 'backup storage');
+    if (backupResult) return backupResult;
+
+    console.warn('[_doRefresh] ❌ All attempts failed — user needs to re-login');
+    return null;
+}
+
+/**
+ * Internal helper: try to rescue session from a specific storage key.
+ * @returns {string|null} access_token or null
+ */
+async function _tryStorageRescue(storageKey, label) {
     try {
-        const stored = await chrome.storage.local.get('fitly-auth-token');
-        const raw = stored['fitly-auth-token'];
+        const stored = await chrome.storage.local.get(storageKey);
+        const raw = stored[storageKey];
         if (!raw) {
-            console.warn('[_doRefresh] ❌ No session in storage — user needs to re-login');
+            console.warn(`[_doRefresh] ❌ No session in ${label} (${storageKey})`);
             return null;
         }
 
         const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
         if (!parsed?.refresh_token) {
-            console.warn('[_doRefresh] ❌ Session in storage has no refresh_token');
+            console.warn(`[_doRefresh] ❌ Session in ${label} has no refresh_token`);
             return null;
         }
 
-        console.log('[_doRefresh] 🔄 Rescue: restoring session from chrome.storage.local...');
+        console.log(`[_doRefresh] 🔄 Rescue from ${label}: restoring session...`);
         const { error: setErr } = await supabase.auth.setSession({
             access_token: parsed.access_token,
             refresh_token: parsed.refresh_token,
         });
 
         if (setErr) {
-            console.error('[_doRefresh] ❌ setSession rescue failed:', setErr.message);
+            console.error(`[_doRefresh] ❌ setSession rescue from ${label} failed:`, setErr.message);
             return null;
         }
 
@@ -224,15 +241,14 @@ async function _doRefresh() {
             const ttl = retryData.session.expires_at
                 ? Math.floor((retryData.session.expires_at * 1000 - Date.now()) / 1000)
                 : 'N/A';
-            console.log('[_doRefresh] ✅ Rescue refresh succeeded! New TTL:', ttl, 's');
+            console.log(`[_doRefresh] ✅ Rescue from ${label} succeeded! New TTL:`, ttl, 's');
             return retryData.session.access_token;
         }
 
-        console.error('[_doRefresh] ❌ Rescue refresh also failed:', retryErr?.message);
+        console.error(`[_doRefresh] ❌ Rescue refresh from ${label} also failed:`, retryErr?.message);
     } catch (rescueErr) {
-        console.error('[_doRefresh] ❌ Rescue exception:', rescueErr);
+        console.error(`[_doRefresh] ❌ Rescue from ${label} exception:`, rescueErr);
     }
-
     return null;
 }
 
@@ -289,6 +305,24 @@ export async function checkAndRefreshToken() {
         await getAuthToken();
     } catch (error) {
         console.error('[checkAndRefreshToken] Error:', error);
+    }
+}
+
+/**
+ * backupSessionForLongOp() — Lưu backup session trước khi bắt đầu long operations.
+ * Supabase client có thể xóa fitly-auth-token nếu refresh fail giữa chừng.
+ * Backup key fitly-auth-backup sẽ được dùng làm last-resort fallback.
+ */
+export async function backupSessionForLongOp() {
+    try {
+        const stored = await chrome.storage.local.get('fitly-auth-token');
+        const raw = stored['fitly-auth-token'];
+        if (raw) {
+            await chrome.storage.local.set({ 'fitly-auth-backup': raw });
+            console.log('[backupSessionForLongOp] ✅ Session backed up');
+        }
+    } catch (e) {
+        console.warn('[backupSessionForLongOp] Failed:', e.message);
     }
 }
 
