@@ -70,10 +70,21 @@ export async function syncFromCloud() {
         if (!token) return { success: false, error: 'Not authenticated' };
 
         const storageData = await chrome.storage.local.get(['user']);
-        const userId = storageData.user?.id;
+        let userId = storageData.user?.id;
+
+        // Fallback: extract user ID from JWT if storage hasn't been updated yet
+        // (race condition: SIGNED_IN event fires before auth handler saves user to storage)
+        if (!userId && token) {
+            try {
+                const parts = token.split('.');
+                if (parts.length === 3) {
+                    const payload = JSON.parse(atob(parts[1]));
+                    userId = payload.sub;
+                }
+            } catch (_) { }
+        }
 
         if (!userId) {
-            console.warn('[syncFromCloud] No user ID found');
             return { success: false, error: 'No user ID' };
         }
 
