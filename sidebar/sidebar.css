@@ -1257,6 +1257,7 @@ h6 {
   transition: var(--transition-base);
   -webkit-user-select: none;
   user-select: none;
+  white-space: nowrap;
 }
 
 .btn:disabled {
@@ -4621,6 +4622,7 @@ h6 {
 
 .error-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 12px;
   justify-content: center;
   margin-top: 8px;
@@ -4681,6 +4683,7 @@ h6 {
 .success-actions,
 .error-actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 12px;
   margin-top: 16px;
   justify-content: center;
