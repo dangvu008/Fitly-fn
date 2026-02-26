@@ -129,11 +129,22 @@ export async function getAuthToken() {
         const expiresAtMs = session.expires_at ? session.expires_at * 1000 : 0;
         const ttl = Math.floor((expiresAtMs - Date.now()) / 1000);
 
-        // Token expired beyond clock skew tolerance → try explicit refresh
-        if (ttl <= -CLOCK_SKEW_TOLERANCE_S) {
-            console.log('[getAuthToken] Token expired (TTL:', ttl, 's, beyond skew tolerance), attempting refresh...');
+        // Token expiring within tolerance window OR already expired → proactive refresh
+        // This prevents sending nearly-expired tokens that the server will reject
+        if (ttl <= CLOCK_SKEW_TOLERANCE_S) {
+            console.log('[getAuthToken] Token near expiry or expired (TTL:', ttl, 's), attempting refresh...');
             const freshToken = await refreshAuthToken();
-            return freshToken;
+            if (freshToken) {
+                return freshToken;
+            }
+            // Refresh failed — if token is not yet expired, return it as last resort
+            if (ttl > 0) {
+                console.warn('[getAuthToken] Refresh failed, returning current token (TTL:', ttl, 's)');
+                return session.access_token;
+            }
+            // Token expired AND refresh failed → return null
+            console.error('[getAuthToken] Token expired and refresh failed');
+            return null;
         }
 
         return session.access_token;
@@ -270,8 +281,8 @@ export async function forceRefreshToken(bypassTTL = false) {
             const fallbackTTL = fallbackSession.expires_at
                 ? Math.floor((fallbackSession.expires_at * 1000 - Date.now()) / 1000)
                 : 0;
-            if (fallbackTTL > -CLOCK_SKEW_TOLERANCE_S) {
-                console.warn('[forceRefreshToken] Refresh failed but current token within skew tolerance (TTL:', fallbackTTL, 's)');
+            if (fallbackTTL > 0) {
+                console.warn('[forceRefreshToken] Refresh failed but current token still valid (TTL:', fallbackTTL, 's)');
                 return fallbackSession.access_token;
             }
         }
