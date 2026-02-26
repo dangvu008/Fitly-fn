@@ -293,11 +293,9 @@ export async function forceRefreshToken(bypassTTL = false) {
         }
     } catch (_) { }
 
-    // All failed
-    console.error('[forceRefreshToken] ❌ ALL FAILED — no valid token');
-    const error = new Error('Token refresh failed: all refresh attempts failed');
-    error.errorCode = 'REFRESH_FAILED';
-    throw error;
+    // All failed — no session found (user likely not logged in)
+    console.warn('[forceRefreshToken] No valid token — user may not be logged in');
+    return null;
 }
 
 export async function checkAndRefreshToken() {
