@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <!-- Main background gradient: deep purple → hot pink -->
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#3D0066"/>
+      <stop offset="50%" stop-color="#7C3AED"/>
+      <stop offset="100%" stop-color="#EC4899"/>
+    </linearGradient>
+
+    <!-- Inner glow gradient for icon elements -->
+    <linearGradient id="icon-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#F9A8D4" stop-opacity="0.85"/>
+    </linearGradient>
+
+    <!-- Subtle inner background highlight -->
+    <radialGradient id="bg-highlight" cx="35%" cy="30%" r="60%">
+      <stop offset="0%" stop-color="#9F67FF" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#3D0066" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Drop shadow filter -->
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <!-- Rounded square background -->
+  <rect width="512" height="512" rx="112" fill="url(#bg-gradient)"/>
+  <!-- Inner highlight overlay -->
+  <rect width="512" height="512" rx="112" fill="url(#bg-highlight)"/>
+
+  <!-- ══════════════════════════════════════════ -->
+  <!--  ICON: Stylized "F" + Dress Silhouette    -->
+  <!-- ══════════════════════════════════════════ -->
+
+  <g filter="url(#shadow)">
+    <!-- Dress silhouette (right side, slightly overlapping F) -->
+    <g opacity="0.92">
+      <!-- Dress: v-neck bodice -->
+      <path d="
+        M 295 145
+        C 295 145, 320 148, 340 145
+        L 380 230
+        L 355 230
+        L 345 215
+        L 345 380
+        C 345 390, 337 398, 327 398
+        L 263 398
+        C 253 398, 245 390, 245 380
+        L 245 215
+        L 235 230
+        L 210 230
+        L 250 145
+        C 262 148, 283 148, 295 145
+        Z
+      " fill="url(#icon-gradient)"/>
+
+      <!-- V-neck cutout on dress -->
+      <path d="
+        M 295 145
+        L 317.5 190
+        L 295 182
+        L 272.5 190
+        Z
+      " fill="#7C3AED" opacity="0.5"/>
+    </g>
+
+    <!-- Stylized "F" lettermark (left side, tall and bold) -->
+    <g>
+      <!-- Vertical stem of F -->
+      <rect x="118" y="128" width="58" height="270" rx="10" fill="url(#icon-gradient)"/>
+
+      <!-- Top horizontal bar of F (wide) -->
+      <rect x="118" y="128" width="180" height="56" rx="10" fill="url(#icon-gradient)"/>
+
+      <!-- Middle horizontal bar of F (shorter, elegant) -->
+      <rect x="118" y="238" width="140" height="50" rx="10" fill="url(#icon-gradient)"/>
+    </g>
+
+    <!-- Small sparkle top-right for premium feel -->
+    <g opacity="0.9">
+      <path d="M 410 108 L 416 126 L 432 132 L 416 138 L 410 156 L 404 138 L 388 132 L 404 126 Z" fill="white"/>
+    </g>
+    <!-- Tiny sparkle bottom-right -->
+    <circle cx="442" cy="182" r="6" fill="white" opacity="0.6"/>
+    <circle cx="388" cy="100" r="4" fill="white" opacity="0.45"/>
+  </g>
+</svg>

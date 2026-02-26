@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitly - Virtual Try-On</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round|Material+Symbols+Outlined" rel="stylesheet">
+    <link rel="stylesheet" href="popup.css">
+</head>
+
+<body>
+    <div class="popup">
+        <!-- Loading Section (Visible by default) -->
+        <section id="loading-section" class="section loading-section">
+            <div class="loading-spinner"></div>
+            <p class="loading-text">Đang tải...</p>
+        </section>
+
+        <!-- Header -->
+        <header class="header hidden">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 32 32" fill="none">
+                        <g transform="translate(16, 17) scale(0.6) translate(-16, -16)">
+                            <path d="M10 12 L10 26 L22 26 L22 12" fill="white" />
+                            <path d="M12 8 L16 11 L20 8 L22 12 L16 13.5 L10 12 L12 8 Z" fill="white" />
+                            <path d="M10 12 L6 14 L8 20 L10 18" fill="white" />
+                            <path d="M22 12 L26 14 L24 20 L22 18" fill="white" />
+                        </g>
+                    </svg>
+                </div>
+                <span class="logo-text">Fitly</span>
+            </div>
+            <div id="gems-badge" class="gems-badge hidden">
+                <span class="material-icons-round gem-icon">diamond</span>
+                <span id="gems-count" class="gem-count">0</span>
+            </div>
+        </header>
+
+        <!-- Auth Section (hidden in demo mode) -->
+        <section id="auth-section" class="section auth-section hidden">
+            <div class="auth-content">
+                <span class="material-icons-round auth-icon" style="font-size: 48px; opacity: 0.5;">account_circle</span>
+                <p>Đăng nhập để bắt đầu thử đồ</p>
+                <button id="login-btn" class="btn btn-primary btn-full">
+                    Đăng nhập
+                </button>
+            </div>
+        </section>
+
+        <!-- Main Section (shown when logged in) -->
+        <section id="main-section" class="section main-section hidden">
+            <!-- User Info - Clickable to toggle dropdown -->
+            <div class="profile-wrapper">
+                <div id="user-info" class="user-info">
+                    <div class="user-avatar">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="8" r="4" />
+                            <path d="M20 21a8 8 0 00-16 0" />
+                        </svg>
+                    </div>
+                    <div class="user-details">
+                        <span id="user-name" class="user-name">User</span>
+                        <span id="user-email" class="user-email">email@example.com</span>
+                    </div>
+                    <span class="material-icons-round dropdown-arrow">expand_more</span>
+                </div>
+
+                <!-- Profile Dropdown Menu -->
+                <div id="profile-menu" class="profile-dropdown hidden">
+                    <!-- User Info Header -->
+                    <div class="menu-header">
+                        <div class="menu-avatar-large" id="menu-avatar">
+                            <!-- Avatar injected by JS -->
+                        </div>
+                        <div class="menu-user-info">
+                            <p id="menu-username" class="menu-username">User</p>
+                            <p id="menu-email" class="menu-email">email@example.com</p>
+                        </div>
+                    </div>
+
+                    <div class="profile-menu-items">
+                        <!-- Open Sidebar -->
+                        <button class="profile-menu-item" id="menu-open-sidebar">
+                            <span class="material-icons-round menu-icon">view_sidebar</span>
+                            <span class="menu-item-text">Mở Sidebar</span>
+                        </button>
+
+                        <!-- Wardrobe -->
+                        <button class="profile-menu-item" id="menu-wardrobe">
+                            <span class="material-icons-round menu-icon">checkroom</span>
+                            <span class="menu-item-text">Tủ đồ của tôi</span>
+                        </button>
+
+                        <!-- Web App -->
+                        <button class="profile-menu-item" id="menu-webapp">
+                            <span class="material-icons-round menu-icon">open_in_new</span>
+                            <span class="menu-item-text">Mở Web App</span>
+                        </button>
+
+                        <div class="profile-menu-spacer"></div>
+
+                        <!-- Buy Gems -->
+                        <button class="profile-menu-item" id="menu-credits">
+                            <span class="material-icons-round menu-icon">diamond</span>
+                            <span class="menu-item-text">Mua thêm Gems</span>
+                        </button>
+
+                        <div class="profile-menu-spacer"></div>
+
+                        <!-- Logout -->
+                        <button class="profile-menu-item text-danger" id="menu-logout">
+                            <span class="material-icons-round menu-icon">logout</span>
+                            <span class="menu-item-text">Đăng xuất</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="actions">
+                <button id="open-sidebar" class="btn btn-primary btn-full">
+                    <span class="material-icons-round">view_sidebar</span>
+                    Mở Sidebar
+                </button>
+
+                <div class="actions-row">
+                    <button id="select-image" class="btn btn-secondary">
+                        <span class="material-icons-round">add_photo_alternate</span>
+                        Chọn ảnh
+                    </button>
+                    <button id="view-wardrobe" class="btn btn-secondary">
+                        <span class="material-icons-round">checkroom</span>
+                        Tủ đồ
+                    </button>
+                </div>
+            </div>
+
+            <!-- Demo Mode Banner -->
+            <div id="demo-mode-banner" class="demo-banner">
+                🧪 Demo Mode - Không cần đăng nhập
+            </div>
+
+            <!-- Tips -->
+            <div class="tips">
+                <p class="tip-title">💡 Mẹo nhanh</p>
+                <p class="tip-text">Chuột phải vào ảnh quần áo trên bất kỳ trang web nào và chọn "Thử đồ này với Fitly"
+                </p>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <a href="http://localhost:3000" target="_blank" id="open-web">Mở Web App</a>
+        </footer>
+    </div>
+    <script src="../lib/icons.js"></script>
+    <script src="popup.js"></script>
+</body>
+
+</html>

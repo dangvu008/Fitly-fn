@@ -1,0 +1,1538 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="referrer" content="no-referrer">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitly - Virtual Try-On</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet">
+    <link rel="stylesheet" href="sidebar.css?v=3">
+</head>
+
+<body>
+    <div id="app">
+        <!-- Loading Section (Visible by default) -->
+        <section id="sidebar-loading-section" class="sidebar-loading-section">
+            <div class="sidebar-loading-spinner"></div>
+            <p class="sidebar-loading-text">Đang tải...</p>
+        </section>
+
+        <!-- Header - Compact Minimalist -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="currentColor" />
+                        <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                        <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                            stroke-linejoin="round" />
+                    </svg>
+                </div>
+                <span class="logo-text">Fitly</span>
+            </div>
+
+            <div class="header-actions">
+                <!-- Compact Gems Display -->
+                <button id="gems-display" class="gems-badge compact" title="Buy More Gems" data-i18n-title="buy_gems">
+                    <span class="material-symbols-outlined gem-icon">diamond</span>
+                    <span id="gems-count" class="gem-count">49</span>
+                </button>
+
+                <!-- Profile Trigger - Avatar + Text -->
+                <div class="profile-wrapper">
+                    <button id="profile-btn" class="profile-trigger" title="Account" data-i18n-title="account">
+                        <!-- Content injected by JS -->
+                    </button>
+
+                    <!-- Expanded Profile Dropdown Menu -->
+                    <div id="profile-menu" class="profile-dropdown hidden">
+                        <!-- User Info Header -->
+                        <div class="menu-header">
+                            <div class="menu-avatar-large" id="menu-avatar">
+                                <!-- Avatar injected by JS -->
+                            </div>
+                            <div class="menu-user-info">
+                                <p id="menu-username" class="menu-username">Guest User</p>
+                                <p id="menu-email" class="menu-email">Sign in to sync</p>
+                            </div>
+                        </div>
+
+                        <div class="profile-menu-items">
+                            <!-- Language -->
+                            <button class="profile-menu-item" id="menu-language">
+                                <span class="material-symbols-outlined menu-icon">language</span>
+                                <span class="menu-item-text" data-i18n="language">Ngôn ngữ / Language</span>
+                                <span id="current-lang-code" class="menu-item-value">VI</span>
+                            </button>
+
+                            <div class="profile-menu-spacer hidden"></div>
+
+                            <!-- Wardrobe (tạm ẩn) -->
+                            <button class="profile-menu-item auth-only hidden" id="menu-wardrobe">
+                                <span class="material-symbols-outlined menu-icon">checkroom</span>
+                                <span class="menu-item-text" data-i18n="my_wardrobe">Tủ đồ của tôi</span>
+                            </button>
+
+                            <!-- Gallery (tạm ẩn) -->
+                            <button class="profile-menu-item auth-only hidden" id="menu-gallery">
+                                <span class="material-symbols-outlined menu-icon">collections</span>
+                                <span class="menu-item-text" data-i18n="saved_photos">Bộ sưu tập</span>
+                            </button>
+
+                            <!-- Web App (tạm ẩn) -->
+                            <button class="profile-menu-item auth-only hidden" id="menu-webapp">
+                                <span class="material-symbols-outlined menu-icon">open_in_new</span>
+                                <span class="menu-item-text" data-i18n="open_fitly_web">Mở Web App</span>
+                            </button>
+
+                            <!-- Buy Gems Shortcut (tạm ẩn) -->
+                            <button class="profile-menu-item auth-only hidden" id="menu-credits">
+                                <span class="material-symbols-outlined menu-icon">diamond</span>
+                                <span class="menu-item-text" data-i18n="buy_gems">Mua thêm Gems</span>
+                            </button>
+
+                            <div class="profile-menu-spacer hidden"></div>
+
+                            <!-- Cache Settings (tạm ẩn) -->
+                            <button class="profile-menu-item auth-only hidden" id="menu-cache-settings">
+                                <span class="material-symbols-outlined menu-icon">cleaning_services</span>
+                                <span class="menu-item-text" data-i18n="cache_management">Xóa Cache</span>
+                                <span id="menu-cache-size" class="menu-item-value">0 MB</span>
+                            </button>
+
+                            <!-- Help -->
+                            <button class="profile-menu-item auth-only" id="menu-help">
+                                <span class="material-symbols-outlined menu-icon">help</span>
+                                <span class="menu-item-text" data-i18n="help">Trợ giúp</span>
+                            </button>
+
+                            <div class="profile-menu-spacer auth-only"></div>
+
+                            <!-- Login (Guest Only) -->
+                            <button class="profile-menu-item guest-only" id="menu-login">
+                                <span class="material-symbols-outlined menu-icon" style="color: #4caf50;">login</span>
+                                <span class="menu-item-text" data-i18n="login">Đăng nhập</span>
+                            </button>
+
+                            <!-- Logout (Auth Only) -->
+                            <button class="profile-menu-item auth-only text-danger" id="menu-logout">
+                                <span class="material-symbols-outlined menu-icon">logout</span>
+                                <span class="menu-item-text" data-i18n="logout">Đăng xuất</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Gems Purchase Panel (hidden by default) -->
+        <section id="gems-panel" class="gems-panel hidden">
+            <!-- Header -->
+            <div class="gems-panel-header">
+                <h3>
+                    <span class="gems-store-icon">💎</span>
+                    <span data-i18n="gems_store_title">Cửa hàng Gems</span>
+                </h3>
+                <button id="close-gems-panel" class="close-btn">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <!-- Balance Display -->
+            <div class="gems-balance-card">
+                <div class="gems-balance-info">
+                    <span class="gems-balance-label" data-i18n="balance">Số dư</span>
+                    <div class="gems-balance-value">
+                        <span class="material-symbols-outlined gems-balance-icon">diamond</span>
+                        <span id="gems-panel-balance" class="gems-balance-number">0</span>
+                    </div>
+                </div>
+                <div class="gems-balance-tries">
+                    <span id="gems-panel-tries" class="gems-tries-count">0</span>
+                    <span class="gems-tries-label" data-i18n="tries_remaining">lần thử</span>
+                </div>
+            </div>
+
+            <!-- Benefits -->
+            <div class="gems-benefits">
+                <div class="gems-benefit-item">
+                    <span class="material-symbols-outlined">checkroom</span>
+                    <span data-i18n="gems_benefit_1">Thử đồ không giới hạn</span>
+                </div>
+                <div class="gems-benefit-item">
+                    <span class="material-symbols-outlined">auto_awesome</span>
+                    <span data-i18n="gems_benefit_2">AI stylist cá nhân</span>
+                </div>
+                <div class="gems-benefit-item">
+                    <span class="material-symbols-outlined">undo</span>
+                    <span data-i18n="gems_benefit_3">Hoàn gem nếu không hài lòng</span>
+                </div>
+            </div>
+
+            <!-- Packages -->
+            <div class="gem-packages">
+                <!-- Packages will be dynamically loaded from database -->
+            </div>
+
+            <p class="gems-panel-note" data-i18n="payment_note">Thanh toán an toàn qua Polar.sh</p>
+        </section>
+
+        <!-- Language Selector Panel (hidden by default) -->
+        <section id="language-panel" class="language-panel hidden">
+            <div class="language-panel-header">
+                <h3>🌐 <span data-i18n="language">Ngôn ngữ / Language</span></h3>
+                <button id="close-language-panel" class="close-btn">×</button>
+            </div>
+
+            <div class="language-options">
+                <button class="language-option" data-lang="vi">
+                    <span class="lang-flag">🇻🇳</span>
+                    <span class="lang-name">Tiếng Việt</span>
+                </button>
+                <button class="language-option" data-lang="en">
+                    <span class="lang-flag">🇺🇸</span>
+                    <span class="lang-name">English</span>
+                </button>
+                <button class="language-option" data-lang="ja">
+                    <span class="lang-flag">🇯🇵</span>
+                    <span class="lang-name">日本語</span>
+                </button>
+                <button class="language-option" data-lang="ko">
+                    <span class="lang-flag">🇰🇷</span>
+                    <span class="lang-name">한국어</span>
+                </button>
+                <button class="language-option" data-lang="zh">
+                    <span class="lang-flag">🇨🇳</span>
+                    <span class="lang-name">中文</span>
+                </button>
+                <button class="language-option" data-lang="th">
+                    <span class="lang-flag">🇹🇭</span>
+                    <span class="lang-name">ไทย</span>
+                </button>
+                <button class="language-option" data-lang="id">
+                    <span class="lang-flag">🇮🇩</span>
+                    <span class="lang-name">Bahasa Indonesia</span>
+                </button>
+                <button class="language-option" data-lang="es">
+                    <span class="lang-flag">🇪🇸</span>
+                    <span class="lang-name">Español</span>
+                </button>
+                <button class="language-option" data-lang="fr">
+                    <span class="lang-flag">🇫🇷</span>
+                    <span class="lang-name">Français</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Auth Section (Redesigned) -->
+        <section id="auth-section" class="section auth-section hidden">
+            <!-- Auth Tabs -->
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="login" data-i18n="login">Đăng nhập</button>
+                <button class="auth-tab" data-tab="register" data-i18n="register">Đăng ký</button>
+            </div>
+
+            <!-- Login Form -->
+            <div id="login-form" class="auth-form">
+                <div class="form-header">
+                    <h3 data-i18n="welcome_back">Chào mừng trở lại! 👋</h3>
+                    <p data-i18n="login_sync_subtitle">Đăng nhập để đồng bộ tủ đồ của bạn</p>
+                </div>
+
+                <div class="input-group">
+                    <span class="material-symbols-outlined input-icon">mail</span>
+                    <input type="email" id="login-email" placeholder="Email" data-i18n-placeholder="email"
+                        autocomplete="email">
+                </div>
+
+                <div class="input-group">
+                    <span class="material-symbols-outlined input-icon">lock</span>
+                    <input type="password" id="login-password" placeholder="Mật khẩu" data-i18n-placeholder="password"
+                        autocomplete="current-password">
+                    <button class="toggle-password" type="button">
+                        <span class="material-symbols-outlined">visibility_off</span>
+                    </button>
+                </div>
+
+                <div class="form-actions">
+                    <label class="checkbox-container">
+                        <input type="checkbox" checked>
+                        <span class="checkmark"></span>
+                        <span data-i18n="remember_me">Ghi nhớ tôi</span>
+                    </label>
+                    <a href="#" class="forgot-password" data-i18n="forgot_password">Quên mật khẩu?</a>
+                </div>
+
+                <button id="login-submit-btn" class="btn btn-primary btn-full" data-i18n="login">
+                    Đăng nhập
+                </button>
+            </div>
+
+            <!-- Register Form -->
+            <div id="register-form" class="auth-form hidden">
+                <div class="form-header">
+                    <h3 data-i18n="create_account">Tạo tài khoản mới 🚀</h3>
+                    <p data-i18n="register_subtitle">Khám phá phong cách của riêng bạn</p>
+                </div>
+
+                <div class="input-group">
+                    <span class="material-symbols-outlined input-icon">person</span>
+                    <input type="text" id="register-name" placeholder="Họ và tên" data-i18n-placeholder="full_name"
+                        autocomplete="name">
+                </div>
+
+                <div class="input-group">
+                    <span class="material-symbols-outlined input-icon">mail</span>
+                    <input type="email" id="register-email" placeholder="Email" data-i18n-placeholder="email"
+                        autocomplete="email">
+                </div>
+
+                <div class="input-group">
+                    <span class="material-symbols-outlined input-icon">lock</span>
+                    <input type="password" id="register-password" placeholder="Mật khẩu"
+                        data-i18n-placeholder="password" autocomplete="new-password">
+                </div>
+
+                <div class="input-group">
+                    <span class="material-symbols-outlined input-icon">lock_reset</span>
+                    <input type="password" id="register-confirm-password" placeholder="Xác nhận mật khẩu"
+                        data-i18n-placeholder="confirm_password" autocomplete="new-password">
+                </div>
+
+                <button id="register-submit-btn" class="btn btn-primary btn-full" data-i18n="register_now">
+                    Đăng ký ngay
+                </button>
+            </div>
+
+            <!-- Social Login Divider -->
+            <div class="auth-divider">
+                <span data-i18n="or_continue_with">Hoặc tiếp tục với</span>
+            </div>
+
+            <div class="social-login-grid">
+                <button id="login-google-btn" class="social-btn google solo" title="Google">
+                    <img src="https://www.vectorlogo.zone/logos/google/google-icon.svg" alt="Google">
+                    <span>Đăng nhập với Google</span>
+                </button>
+                <!-- Facebook và Apple tạm ẩn -->
+                <button id="login-facebook-btn" class="social-btn facebook" title="Facebook" style="display:none">
+                    <img src="https://www.svgrepo.com/show/475647/facebook-color.svg" alt="Facebook">
+                </button>
+                <button id="login-apple-btn" class="social-btn apple" title="Apple" style="display:none">
+                    <img src="https://www.vectorlogo.zone/logos/apple/apple-tile.svg" alt="Apple">
+                </button>
+            </div>
+
+            <!-- Guest Mode (đã ẩn) -->
+            <button id="skip-login-btn" class="btn-text-only" data-i18n="guest_mode_button" style="display:none">
+                Dùng thử không cần đăng nhập →
+            </button>
+        </section>
+
+        <!-- Main Content (shown when logged in) -->
+        <main id="main-content" class="main-body hidden">
+            <!-- Demo Mode Banner -->
+            <div id="demo-banner" class="demo-banner">
+                🧪 Demo Mode - Dữ liệu mẫu
+            </div>
+
+            <!-- Model Section -->
+            <!-- Model Section Redesigned - Main Image on Top + Thumbnails Below -->
+            <section class="section model-redesign-section">
+                <div class="section-header">
+                    <h3 data-i18n="model_section_title">Ảnh mẫu toàn thân</h3>
+                </div>
+
+                <div class="model-view-container">
+                    <!-- Main Model Display (Top - Full Width) -->
+                    <div id="model-image-container" class="image-container model-container">
+                        <div id="model-placeholder" class="placeholder empty-state minimal">
+                            <div class="empty-icon-circle minimal">
+                                <span class="material-symbols-outlined">add_a_photo</span>
+                            </div>
+                            <span class="empty-label" data-i18n="model_add_photo">THÊM ẢNH</span>
+                            <span class="empty-instruction" data-i18n="model_fullbody_hint">Ảnh toàn thân</span>
+                        </div>
+                        <img id="model-image" class="preview-image hidden" alt="Model">
+
+                        <!-- Action Buttons on Main Image (shown when image is loaded) -->
+                        <div id="main-image-actions" class="main-image-actions hidden">
+                            <button id="main-pin-btn" class="main-action-btn pin-btn" title="Đặt làm ảnh mặc định"
+                                data-i18n-title="user_model.pin_tooltip">
+                                <span class="material-symbols-outlined">push_pin</span>
+                                <span class="btn-label" data-i18n="user_model.pin_action">Đặt mặc định</span>
+                            </button>
+                            <button id="main-delete-btn" class="main-action-btn delete-btn" title="Xóa ảnh này"
+                                data-i18n-title="delete">
+                                <span class="material-symbols-outlined">delete</span>
+                                <span class="btn-label" data-i18n="delete">Xóa</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Horizontal Scrollable Thumbnails (Bottom) -->
+                    <div id="user-models-grid" class="user-models-grid-vertical">
+                        <!-- Items injected by JS -->
+                    </div>
+                </div>
+
+                <input type="file" id="model-upload-input" accept="image/*" hidden>
+            </section>
+
+            <!-- Mix Match Section (New Design) -->
+            <section class="mix-match-wrapper">
+
+                <!-- Top Card: Visual 2D (Replaces Product Section) -->
+                <div class="visual-card">
+                    <div class="visual-header">
+                        <span data-i18n="selected_items">Item đã chọn</span>
+                        <button id="mix-match-toggle" class="mix-match-toggle" title="Bật/tắt chế độ phối đồ"
+                            data-i18n-title="mix_match_toggle_tip">
+                            <span class="material-symbols-outlined toggle-icon">styler</span>
+                            <span class="toggle-label" data-i18n="mix_match_toggle">Phối đồ</span>
+                            <span class="toggle-indicator"></span>
+                        </button>
+                    </div>
+
+                    <div id="clothing-image-container" class="visual-image-container">
+                        <!-- Placeholder -->
+                        <div id="clothing-placeholder" class="visual-placeholder">
+                            <i class="material-symbols-outlined placeholder-icon">checkroom</i>
+                            <span data-i18n="no_item_selected">Chưa chọn đồ</span>
+                        </div>
+
+                        <!-- Image -->
+                        <img id="clothing-image" class="visual-img hidden" alt="Clothing">
+
+                        <!-- Clear Selection Button (shown when clothing image is active) -->
+                        <button id="clear-clothing-selection-btn" class="clear-selection-btn hidden"
+                            title="Bỏ chọn tất cả" data-i18n-title="clear_selection">
+                            <span class="material-symbols-outlined">close</span>
+                        </button>
+
+                        <!-- Floating Mock Tags (Only visible when image is loaded) -->
+                        <div class="floating-tag tag-left hidden" id="tag-top">
+                            <span class="tag-dot"></span> Áo Polo
+                        </div>
+                        <div class="floating-tag tag-right hidden" id="tag-bottom">
+                            <span class="tag-dot"></span> Quần Tây
+                        </div>
+                    </div>
+
+                    <!-- Selected Items Bubbles (New Design) - Moved outside container to fix layout -->
+                    <div id="selected-items-bubbles" class="selected-items-bubbles">
+                        <!-- Injected via JS -->
+                    </div>
+                </div>
+
+                <!-- Bottom Section: Selection (Replaces History) -->
+                <div class="selection-section" id="clothing-history-section"> <!-- Retain ID for JS -->
+
+                    <div class="selection-header">
+                        <div class="selection-title-group">
+                            <span class="material-symbols-outlined selection-icon">style</span>
+                            <div class="selection-text">
+                                <h3 data-i18n="mix_match_title">Chọn đồ phối</h3>
+                                <p data-i18n="mix_match_subtitle">Chọn 1 món từ mỗi danh mục để thử đồ</p>
+                            </div>
+                        </div>
+                        <button id="open-wardrobe-btn" class="section-action" data-i18n="your_wardrobe">Tủ đồ của
+                            bạn</button>
+                    </div>
+
+                    <!-- Tabs -->
+                    <div class="category-tabs" id="category-tabs">
+                        <button class="cat-tab active" data-category="top" data-i18n="wardrobe_tabs.top">Áo</button>
+                        <button class="cat-tab" data-category="bottom" data-i18n="wardrobe_tabs.bottom">Quần</button>
+                        <button class="cat-tab" data-category="dress" data-i18n="wardrobe_tabs.dress">Váy</button>
+                        <button class="cat-tab" data-category="shoes" data-i18n="wardrobe_tabs.shoes">Giày</button>
+                        <button class="cat-tab" data-category="accessories" data-i18n="wardrobe_tabs.accessories">Phụ
+                            kiện</button>
+                    </div>
+
+                    <!-- Carousel (Reusing Grid ID) -->
+                    <div id="clothing-history-grid" class="item-carousel">
+                        <!-- JS injects items here -->
+                    </div>
+
+                    <!-- Action Button -->
+                    <button id="try-on-btn" class="try-on-pill-btn" disabled>
+                        <div class="try-count-badge">2</div>
+                        Thử 2 món đồ ngay
+                    </button>
+
+                </div>
+            </section>
+
+            <!-- Inline Result Section (Latest Result) -->
+            <section id="inline-result-section" class="section inline-result-section hidden">
+                <div class="section-header">
+                    <h3>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                            <path d="M2 17l10 5 10-5" />
+                            <path d="M2 12l10 5 10-5" />
+                        </svg>
+                        <span data-i18n="latest_result">Kết quả mới nhất</span>
+                    </h3>
+
+                </div>
+
+                <!-- Result Image Container (click to zoom) -->
+                <div class="inline-result-container" id="result-zoom-trigger" title="Nhấn để phóng to">
+                    <!-- Loading overlay (hidden by default) -->
+                    <div id="ai-loading-overlay" class="ai-loading-overlay hidden">
+                        <div class="ai-shimmer"></div>
+                        <div class="ai-loading-text">Đang xử lý<span class="dots">...</span></div>
+                    </div>
+
+                    <!-- Before/After Slider -->
+                    <div class="image-comparison-slider">
+                        <!-- After Image (Result) -->
+                        <img id="inline-result-image" class="inline-result-image zoomable-image slider-image-after"
+                            src="" alt="Try-on result" />
+                        <!-- Before Image (Original) -->
+                        <div class="slider-image-before-wrapper">
+                            <img id="inline-model-image" class="inline-model-image zoomable-image slider-image-before"
+                                src="" alt="Original model" />
+                        </div>
+                        <!-- Slider Handle -->
+                        <div class="slider-handle">
+                            <div class="slider-handle-line"></div>
+                            <div class="slider-handle-button">
+                                <span class="material-symbols-outlined">swap_horiz</span>
+                            </div>
+                        </div>
+                        <input type="range" min="0" max="100" value="50" class="slider-range-input" id="slider-range"
+                            aria-label="So sánh ảnh" />
+                    </div>
+
+                    <!-- Action Buttons (Moved directly over image container top-right) -->
+                    <div class="inline-result-actions">
+                        <button id="result-download-btn" class="result-action-btn" title="Download"
+                            data-i18n-title="download">
+                            <span class="material-symbols-outlined">download</span>
+                        </button>
+                        <button id="result-copy-btn" class="result-action-btn" title="Copy Image"
+                            data-i18n-title="copy_image">
+                            <span class="material-symbols-outlined">content_copy</span>
+                        </button>
+                        <button id="result-save-btn" class="result-action-btn" title="Save to Wardrobe"
+                            data-i18n-title="save_to_collection">
+                            <span class="material-symbols-outlined">bookmark_border</span>
+                        </button>
+                        <button id="result-compare-btn" class="result-action-btn" title="So sánh outfit"
+                            data-i18n-title="compare_outfit" style="display:none;">
+                            <!-- Hide original compare since we use slider now -->
+                            <span class="material-symbols-outlined">compare</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Edit Section -->
+                <div class="inline-edit-section">
+                    <div class="edit-input-group">
+                        <input type="text" id="inline-edit-input" class="edit-input"
+                            placeholder="Nhập yêu cầu chỉnh sửa..." data-i18n-placeholder="edit_request_placeholder" />
+                        <button id="inline-edit-undo-btn" class="edit-undo-btn" title="Hoàn tác chỉnh sửa"
+                            aria-label="Undo edit">
+                            <span class="material-symbols-outlined">undo</span>
+                        </button>
+                        <button id="regenerate-btn" class="edit-submit-btn regenerate-btn" title="Tạo lại kết quả">
+                            <span class="material-symbols-outlined">refresh</span>
+                        </button>
+                        <button id="inline-edit-btn" class="edit-submit-btn" title="Áp dụng Edit"
+                            data-i18n-title="edit_label">
+                            <span class="material-symbols-outlined">edit_square</span>
+                        </button>
+                    </div>
+                    <div id="edit-progress-note" class="edit-progress-note"></div>
+                    <div class="edit-suggestions categorized-tags">
+                        <div class="tag-group">
+                            <span class="tag-group-label">Màu sắc:</span>
+                            <div class="tag-group-items">
+                                <button class="edit-suggestion-btn color-tag" data-suggestion="đổi áo sang màu trắng"
+                                    style="background-color: #ffffff; color: #000;" title="Trắng">Trắng</button>
+                                <button class="edit-suggestion-btn color-tag" data-suggestion="đổi áo sang màu đen"
+                                    style="background-color: #000000; color: #fff;" title="Đen">Đen</button>
+                                <button class="edit-suggestion-btn color-tag"
+                                    data-suggestion="đổi áo sang màu xanh dương"
+                                    style="background-color: #2196F3; color: #fff;" title="Xanh">Xanh</button>
+                                <button class="edit-suggestion-btn color-tag" data-suggestion="đổi áo sang màu đỏ"
+                                    style="background-color: #F44336; color: #fff;" title="Đỏ">Đỏ</button>
+                            </div>
+                        </div>
+                        <div class="tag-group">
+                            <span class="tag-group-label">Phụ kiện:</span>
+                            <div class="tag-group-items">
+                                <button class="edit-suggestion-btn tag-chip"
+                                    data-suggestion="thêm kính râm">+Kính</button>
+                                <button class="edit-suggestion-btn tag-chip" data-suggestion="thêm đồng hồ">+Đồng
+                                    hồ</button>
+                                <button class="edit-suggestion-btn tag-chip" data-suggestion="thêm mũ">+Mũ</button>
+                            </div>
+                        </div>
+                        <div class="tag-group">
+                            <span class="tag-group-label">Phong cách:</span>
+                            <div class="tag-group-items">
+                                <button class="edit-suggestion-btn tag-chip" data-suggestion="sơ vin áo vào quần">Sơ
+                                    vin</button>
+                                <button class="edit-suggestion-btn tag-chip" data-suggestion="xắn tay áo lên">Xắn
+                                    tay</button>
+                                <button class="edit-suggestion-btn tag-chip" data-suggestion="mở cúc áo trên">Mở
+                                    cúc</button>
+                            </div>
+                        </div>
+                        <div class="tag-group">
+                            <span class="tag-group-label">Bối cảnh:</span>
+                            <div class="tag-group-items">
+                                <button class="edit-suggestion-btn tag-chip"
+                                    data-suggestion="đổi phông nền sang studio chuyên nghiệp">Studio</button>
+                                <button class="edit-suggestion-btn tag-chip"
+                                    data-suggestion="đổi phông nền sang đường phố">Đường phố</button>
+                                <button class="edit-suggestion-btn tag-chip"
+                                    data-suggestion="đổi phông nền sang văn phòng">Văn phòng</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Satisfaction Confirmation Bar -->
+                <div id="satisfaction-bar" class="satisfaction-bar hidden">
+                    <span class="satisfaction-question" data-i18n="satisfaction_question">Kết quả có giống bạn
+                        không?</span>
+                    <div class="satisfaction-actions">
+                        <button id="result-satisfied-btn" class="satisfaction-btn satisfied">
+                            <span class="material-symbols-outlined">thumb_up</span>
+                            <span data-i18n="satisfied">Hài lòng</span>
+                        </button>
+                        <button id="result-unsatisfied-btn" class="satisfaction-btn unsatisfied">
+                            <span class="material-symbols-outlined">thumb_down</span>
+                            <span data-i18n="unsatisfied_refund">Sai, hoàn gem</span>
+                        </button>
+                    </div>
+                </div>
+    </div>
+
+    <!-- Quick Wardrobe Carousel underneath Try-On Result -->
+    <div class="quick-wardrobe-carousel-container">
+        <div class="quick-wardrobe-header">
+            <span class="quick-wardrobe-title" data-i18n="item_history_title">Lịch sử item đã thử</span>
+        </div>
+        <div id="quick-wardrobe-carousel" class="item-carousel small-carousel">
+            <!-- JS injects small items here -->
+        </div>
+    </div>
+    </section>
+
+    <!-- Created Outfits - Horizontal List -->
+    <section id="created-outfits-list-section" class="section created-outfits-section hidden">
+        <div class="section-header">
+            <h3>
+                <span class="material-symbols-outlined">checkroom</span>
+                <span data-i18n="outfits_just_created">Outfit vừa tạo</span>
+            </h3>
+            <div class="created-outfits-header-actions">
+                <button id="toggle-hidden-outfits-btn" class="section-action-secondary hidden"
+                    onclick="toggleShowHiddenOutfits()">Hiện ẩn</button>
+                <button id="view-gallery-btn" class="section-action" data-i18n="view_all">XEM TẤT CẢ</button>
+            </div>
+        </div>
+        <div id="created-outfits-list" class="horizontal-outfits-scroll">
+            <!-- Outfits injected by JS -->
+        </div>
+    </section>
+
+
+
+    <!-- Keyboard Shortcuts Hint -->
+    <div class="shortcuts-hint">
+        <span title="V: Paste URL | T: Try On | C: Copy | R: Rename | 1-9: Select Result | Esc: Close"
+            data-i18n-title="shortcuts_hint">
+            <span data-i18n="shortcuts_hint">⌨️ Shortcuts:</span> <kbd>V</kbd> <kbd>T</kbd> <kbd>C</kbd>
+            <kbd>R</kbd> <kbd>1-9</kbd>
+        </span>
+    </div>
+
+    </main>
+
+    <!-- All Outfits Section (Select Looks — Full Screen Overlay, OUTSIDE main-content) -->
+    <section id="all-outfits-section" class="section all-outfits-section hidden">
+        <!-- Header -->
+        <div class="ao-header">
+            <div class="ao-header-top">
+                <div class="ao-branding">
+                    <span class="material-symbols-outlined ao-brand-icon">checkroom</span>
+                    <span class="ao-brand-text">GEMINI STYLIST</span>
+                </div>
+                <div class="ao-header-actions">
+                    <button id="ao-search-btn" class="ao-header-btn" title="Search">
+                        <span class="material-symbols-outlined">search</span>
+                    </button>
+                    <button id="ao-filter-btn" class="ao-header-btn" title="Filter">
+                        <span class="material-symbols-outlined">tune</span>
+                    </button>
+                    <button id="ao-close-btn" class="ao-header-btn" title="Close">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+            </div>
+            <h2 class="ao-title" data-i18n="all_outfits.title">Select Looks</h2>
+
+            <!-- Search Bar (hidden by default) -->
+            <div id="ao-search-wrap" class="ao-search-wrap hidden">
+                <span class="material-symbols-outlined ao-search-icon">search</span>
+                <input type="text" id="ao-search-input" class="ao-search-input" placeholder="Search outfits..."
+                    data-i18n-placeholder="all_outfits.search_placeholder">
+            </div>
+
+            <!-- Tabs -->
+            <div class="ao-tabs">
+                <button class="ao-tab active" data-tab="all" data-i18n="all_outfits.tab_all">All</button>
+                <button class="ao-tab" data-tab="favorites" data-i18n="all_outfits.tab_favorites">Favorites</button>
+                <button class="ao-tab" data-tab="external" data-i18n="all_outfits.tab_external">
+                    <span class="material-symbols-outlined"
+                        style="font-size:16px;vertical-align:middle;margin-right:2px">language</span>
+                    Từ web
+                </button>
+                <button class="ao-tab" data-tab="deleted" data-i18n="all_outfits.tab_trash">
+                    <span class="material-symbols-outlined"
+                        style="font-size:16px;vertical-align:middle;margin-right:2px">delete</span>
+                    Thùng rác
+                </button>
+            </div>
+        </div>
+
+        <!-- Scrollable Grid -->
+        <div class="ao-grid-scroll">
+            <div id="all-outfits-grid" class="ao-grid">
+                <!-- Cards injected by JS -->
+            </div>
+        </div>
+
+        <!-- Sticky Bottom Bar -->
+        <div class="ao-bottom-bar">
+            <button id="ao-compare-btn" class="ao-bottom-btn ao-btn-outline" disabled>
+                <span class="material-symbols-outlined">compare</span> Compare
+            </button>
+            <button id="ao-lookbook-btn" class="ao-bottom-btn ao-btn-filled">
+                <span class="material-symbols-outlined">auto_stories</span> Lookbook
+            </button>
+        </div>
+    </section>
+
+    <!-- Wardrobe Category Modal (shown when adding item from context menu) -->
+    <div id="wardrobe-category-modal" class="wardrobe-category-modal-overlay hidden">
+        <div class="wardrobe-category-card">
+            <div class="category-modal-header">
+                <div class="category-modal-title">
+                    <span class="category-modal-icon">🗂️</span>
+                    <h3>Thêm vào tủ đồ</h3>
+                </div>
+                <button id="close-category-modal-btn" class="icon-btn-plain">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <!-- Image Preview -->
+            <div class="category-modal-preview-wrap">
+                <img id="category-modal-preview-img" src="" alt="Preview" class="category-modal-preview-img" />
+                <div id="category-modal-img-placeholder" class="category-modal-img-placeholder hidden">
+                    <span class="material-symbols-outlined">image_not_supported</span>
+                </div>
+            </div>
+
+            <!-- Image Quality Warning (shown when image doesn't meet wardrobe standards) -->
+            <div id="wardrobe-quality-warning" class="wardrobe-quality-warning hidden">
+                <span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;">warning</span>
+                <span id="wardrobe-quality-warning-text">Ảnh này có thể không phù hợp để thử đồ.</span>
+                <button id="wardrobe-quality-dismiss"
+                    style="background:none;border:none;cursor:pointer;padding:0;margin-left:4px;opacity:0.7;font-size:16px;"
+                    title="Bỏ qua cảnh báo">×</button>
+            </div>
+
+            <!-- Item Name Input -->
+            <div class="category-modal-name-wrap">
+                <input type="text" id="category-modal-name" class="category-modal-name-input"
+                    placeholder="Tên item (tùy chọn)" maxlength="60" />
+            </div>
+
+            <!-- Category Selection -->
+            <p class="category-modal-label">Phân loại:</p>
+            <div class="category-chips">
+                <button class="category-chip" data-category="top">👕 Áo</button>
+                <button class="category-chip" data-category="bottom">👖 Quần</button>
+                <button class="category-chip" data-category="dress">👗 Váy/Đầm</button>
+                <button class="category-chip" data-category="shoes">👟 Giày</button>
+                <button class="category-chip" data-category="accessories">👜 Phụ kiện</button>
+                <button class="category-chip category-chip--outfit" data-category="outfit">🧍 Outfit /
+                    Lookbook</button>
+            </div>
+
+            <!-- Confirm Button -->
+            <button id="confirm-add-wardrobe-btn" class="btn btn-primary btn-full category-modal-confirm-btn" disabled>
+                <span class="material-symbols-outlined">checkroom</span>
+                Lưu vào tủ đồ
+            </button>
+        </div>
+    </div>
+
+    <!-- Wardrobe Page Section (Full Screen) -->
+    <section id="wardrobe-section" class="section wardrobe-section hidden">
+        <!-- Header -->
+        <div class="wardrobe-header">
+            <div class="wardrobe-title-bar">
+                <button id="close-wardrobe-btn" class="icon-btn-plain">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                </button>
+                <h2 data-i18n="your_wardrobe">Tủ đồ của bạn</h2>
+                <div class="wardrobe-actions">
+                    <span class="wardrobe-count" id="wardrobe-total-count">0 items</span>
+                </div>
+            </div>
+
+            <!-- Search & Filter Bar -->
+            <div class="wardrobe-tools">
+                <div class="search-box">
+                    <span class="material-symbols-outlined search-icon">search</span>
+                    <input type="text" id="wardrobe-search" placeholder="Tìm kiếm..."
+                        data-i18n-placeholder="search_placeholder">
+                    <button id="wardrobe-search-clear" class="hidden">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+                <button id="wardrobe-sort-btn" class="icon-btn-plain" title="Sort" data-i18n-title="sort_btn">
+                    <span class="material-symbols-outlined">sort</span>
+                </button>
+            </div>
+
+            <!-- Categories Tabs (Scrollable) -->
+            <div class="wardrobe-categories scroll-hide">
+                <button class="wardrobe-cat-tab active" data-category="all" data-i18n="wardrobe_tabs.all">Tất
+                    cả</button>
+                <button class="wardrobe-cat-tab" data-category="top" data-i18n="wardrobe_tabs.top">Áo</button>
+                <button class="wardrobe-cat-tab" data-category="bottom" data-i18n="wardrobe_tabs.bottom">Quần</button>
+                <button class="wardrobe-cat-tab" data-category="dress" data-i18n="wardrobe_tabs.dress">Váy</button>
+                <button class="wardrobe-cat-tab" data-category="shoes" data-i18n="wardrobe_tabs.shoes">Giày</button>
+                <button class="wardrobe-cat-tab" data-category="accessories" data-i18n="wardrobe_tabs.accessories">Phụ
+                    kiện</button>
+            </div>
+        </div>
+
+        <!-- Grid Content -->
+        <div id="wardrobe-grid" class="wardrobe-grid scroll-y">
+            <!-- Wardrobe items injected by JS -->
+        </div>
+
+        <!-- Empty State (Hidden) -->
+        <div id="wardrobe-empty" class="wardrobe-empty hidden">
+            <div class="empty-icon-circle">
+                <span class="material-symbols-outlined">checkroom</span>
+            </div>
+            <h3 data-i18n="wardrobe_empty_title">Tủ đồ trống trơn!</h3>
+            <p data-i18n="wardrobe_empty_msg">Hãy chuột phải vào ảnh quần áo trên web để thêm vào đây nhé.</p>
+        </div>
+    </section>
+
+    <!-- Share Lookbook Section -->
+    <section id="share-lookbook-section" class="section share-section hidden">
+        <!-- Header -->
+        <div class="share-header">
+            <button id="close-share-btn" class="icon-btn-plain">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+            <h2 class="share-title">The Lookbook</h2>
+            <button class="icon-btn-plain">
+                <span class="material-symbols-outlined">more_horiz</span>
+            </button>
+        </div>
+
+        <!-- Scrollable Content -->
+        <div class="share-content">
+            <!-- Lookbook Card -->
+            <div id="lookbook-card" class="lookbook-card">
+                <div id="lookbook-brand" class="lookbook-brand" contenteditable="true" spellcheck="false">FITLY
+                    STYLIST</div>
+
+                <!-- Images Container (1 or 2 images) -->
+                <div id="lookbook-images" class="lookbook-images-container">
+                    <!-- Injected via JS -->
+                </div>
+
+                <!-- Outfit Picker (hidden by default) -->
+                <div id="lookbook-outfit-picker" class="lookbook-outfit-picker hidden">
+                    <div class="lookbook-picker-header">
+                        <h4 data-i18n="lookbook.pick_outfit">Pick an outfit</h4>
+                        <button class="lookbook-picker-close-btn" onclick="closeOutfitPicker()">
+                            <span class="material-symbols-outlined">close</span>
+                        </button>
+                    </div>
+                    <div class="lookbook-picker-grid" id="lookbook-picker-grid"></div>
+                </div>
+
+                <!-- Editable Text -->
+                <div class="lookbook-caption-container">
+                    <div class="lookbook-divider"></div>
+                    <div id="lookbook-caption" class="lookbook-caption" contenteditable="true" spellcheck="false">
+                        Help me choose the perfect fit for tonight's gala ✨
+                    </div>
+                    <div id="lookbook-subcaption" class="lookbook-subcaption" contenteditable="true" spellcheck="false">
+                        SPRING COLLECTION 2024</div>
+                </div>
+
+                <!-- Reaction Buttons (Decorative) -->
+                <div class="lookbook-reactions">
+                    <button class="reaction-circle pink"><span
+                            class="material-symbols-outlined">favorite</span></button>
+                    <button class="reaction-circle yellow"><span
+                            class="material-symbols-outlined">auto_awesome</span></button>
+                    <button class="reaction-circle white"><span
+                            class="material-symbols-outlined">question_mark</span></button>
+                </div>
+            </div>
+
+            <!-- Share to Socials -->
+            <div class="share-socials-section">
+                <h3 class="share-section-title" data-i18n="share_label">Share to Socials</h3>
+                <div class="social-grid">
+                    <button class="social-item" data-platform="instagram">
+                        <div class="social-icon-circle instagram">
+                            <img src="../assets/icon-instagram.svg" alt="IG" class="social-icon-img"
+                                data-fallback="instagram">
+                        </div>
+                        <span class="social-label" data-i18n="share_to.story">Story</span>
+                    </button>
+                    <button class="social-item" data-platform="twitter">
+                        <div class="social-icon-circle twitter">
+                            <span class="social-text-icon">𝕏</span>
+                        </div>
+                        <span class="social-label" data-i18n="share_to.x">X</span>
+                    </button>
+                    <button class="social-item" data-platform="telegram">
+                        <div class="social-icon-circle telegram">
+                            <span class="material-symbols-outlined">send</span>
+                        </div>
+                        <span class="social-label" data-i18n="share_to.send">Send</span>
+                    </button>
+                    <button class="social-item" data-platform="more">
+                        <div class="social-icon-circle more">
+                            <span class="material-symbols-outlined">more_horiz</span>
+                        </div>
+                        <span class="social-label" data-i18n="share_to.more">More</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Copy Link -->
+            <div class="copy-link-card">
+                <div class="link-icon-circle">
+                    <span class="material-symbols-outlined">link</span>
+                </div>
+                <div class="link-info">
+                    <span class="link-label" data-i18n="stylist_link">STYLIST LINK</span>
+                    <span class="link-url">fitly.app/share/x839z...</span>
+                </div>
+                <button id="copy-link-btn" class="copy-pill-btn" data-i18n="copy_link">Copy</button>
+            </div>
+        </div>
+
+        <!-- Bottom Button -->
+        <div class="share-footer">
+            <button id="download-final-btn" class="download-block-btn">
+                <span data-i18n="download_lookbook_btn">DOWNLOAD LOOKBOOK</span> <span
+                    class="material-symbols-outlined">arrow_downward</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- Compare Outfit Section -->
+    <section id="compare-outfit-section" class="section compare-outfit-section hidden">
+        <!-- Header -->
+        <div class="compare-header">
+            <button id="close-compare-btn" class="icon-btn-plain">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+            <h2 data-i18n="compare_outfit">So sánh Outfit</h2>
+            <button id="compare-swap-btn" class="icon-btn-plain" title="Đổi vị trí">
+                <span class="material-symbols-outlined">swap_horiz</span>
+            </button>
+        </div>
+
+        <!-- Compare View -->
+        <div class="compare-body">
+            <!-- Side by Side Images -->
+            <div class="compare-images-container">
+                <!-- Slot A -->
+                <div class="compare-slot" data-slot="A">
+                    <div class="compare-slot-label">A</div>
+                    <div class="compare-slot-image" id="compare-slot-a">
+                        <img id="compare-img-a" src="" alt="Outfit A" />
+                        <div class="compare-slot-placeholder" id="compare-placeholder-a">
+                            <span class="material-symbols-outlined">add_photo_alternate</span>
+                            <span data-i18n="select_outfit">Chọn outfit</span>
+                        </div>
+                    </div>
+                    <button class="compare-select-btn" data-slot="A" data-i18n="choose_this">Chọn outfit này
+                        ✓</button>
+                </div>
+
+                <!-- VS Divider -->
+                <div class="compare-vs-divider">
+                    <span>VS</span>
+                </div>
+
+                <!-- Slot B -->
+                <div class="compare-slot" data-slot="B">
+                    <div class="compare-slot-label">B</div>
+                    <div class="compare-slot-image" id="compare-slot-b">
+                        <img id="compare-img-b" src="" alt="Outfit B" />
+                        <div class="compare-slot-placeholder" id="compare-placeholder-b">
+                            <span class="material-symbols-outlined">add_photo_alternate</span>
+                            <span data-i18n="select_outfit">Chọn outfit</span>
+                        </div>
+                    </div>
+                    <button class="compare-select-btn" data-slot="B" data-i18n="choose_this">Chọn outfit này
+                        ✓</button>
+                </div>
+            </div>
+
+            <!-- Overlay Slider -->
+            <div class="compare-slider-section">
+                <label class="compare-slider-label">
+                    <span class="material-symbols-outlined" style="font-size: 16px;">tune</span>
+                    <span data-i18n="compare_slider">Trượt để so sánh</span>
+                </label>
+                <input type="range" id="compare-slider" class="compare-slider" min="0" max="100" value="50" />
+            </div>
+
+            <!-- Available Results to Compare -->
+            <div class="compare-results-picker">
+                <h4 data-i18n="pick_outfit_to_compare">Chọn outfit để so sánh</h4>
+                <div id="compare-results-grid" class="compare-results-grid">
+                    <!-- Injected by JS -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Help Page Section (Full Screen Overlay) -->
+    <section id="help-section" class="section help-section hidden">
+        <!-- Header -->
+        <div class="help-header">
+            <button id="close-help-btn" class="icon-btn-plain">
+                <span class="material-symbols-outlined">arrow_back</span>
+            </button>
+            <h2 data-i18n="help_page.title">Trợ giúp</h2>
+            <div class="help-header-spacer"></div>
+        </div>
+
+        <!-- Scrollable Content -->
+        <div class="help-content">
+
+            <!-- Getting Started Section -->
+            <div class="help-block">
+                <h3 class="help-block-title">
+                    <span class="material-symbols-outlined help-block-icon">rocket_launch</span>
+                    <span data-i18n="help_page.getting_started">Bắt đầu nhanh</span>
+                </h3>
+
+                <div class="help-tutorials-grid">
+                    <!-- Tutorial 1: Upload Model -->
+                    <div class="help-tutorial-card">
+                        <div class="help-tutorial-icon-wrap"
+                            style="background: linear-gradient(135deg, #E8F5E9, #C8E6C9);">
+                            <span class="material-symbols-outlined" style="color: #43A047;">add_a_photo</span>
+                        </div>
+                        <div class="help-tutorial-text">
+                            <h4 data-i18n="help_page.tut_model_title">1. Tải ảnh mẫu</h4>
+                            <p data-i18n="help_page.tut_model_desc">Tải ảnh toàn thân của bạn làm mẫu thử đồ. Ảnh rõ
+                                nét, đứng thẳng sẽ cho kết quả tốt nhất.</p>
+                        </div>
+                    </div>
+
+                    <!-- Tutorial 2: Add to Wardrobe -->
+                    <div class="help-tutorial-card">
+                        <div class="help-tutorial-icon-wrap"
+                            style="background: linear-gradient(135deg, #E3F2FD, #BBDEFB);">
+                            <span class="material-symbols-outlined" style="color: #1E88E5;">checkroom</span>
+                        </div>
+                        <div class="help-tutorial-text">
+                            <h4 data-i18n="help_page.tut_wardrobe_title">2. Thêm đồ vào tủ</h4>
+                            <p data-i18n="help_page.tut_wardrobe_desc">Chuột phải vào ảnh quần áo trên web → chọn
+                                "Thử với Fitly" hoặc "Thêm vào tủ đồ".</p>
+                        </div>
+                    </div>
+
+                    <!-- Tutorial 3: Try On -->
+                    <div class="help-tutorial-card">
+                        <div class="help-tutorial-icon-wrap"
+                            style="background: linear-gradient(135deg, #FFF3E0, #FFE0B2);">
+                            <span class="material-symbols-outlined" style="color: #FB8C00;">auto_awesome</span>
+                        </div>
+                        <div class="help-tutorial-text">
+                            <h4 data-i18n="help_page.tut_tryon_title">3. Thử đồ ảo</h4>
+                            <p data-i18n="help_page.tut_tryon_desc">Chọn 1-2 món đồ từ tủ → bấm "Thử đồ ngay". AI sẽ
+                                tạo ảnh thử đồ trong 20-30 giây.</p>
+                        </div>
+                    </div>
+
+                    <!-- Tutorial 4: Edit Result -->
+                    <div class="help-tutorial-card">
+                        <div class="help-tutorial-icon-wrap"
+                            style="background: linear-gradient(135deg, #F3E5F5, #E1BEE7);">
+                            <span class="material-symbols-outlined" style="color: #8E24AA;">edit_square</span>
+                        </div>
+                        <div class="help-tutorial-text">
+                            <h4 data-i18n="help_page.tut_edit_title">4. Chỉnh sửa kết quả</h4>
+                            <p data-i18n="help_page.tut_edit_desc">Sau khi có kết quả, bạn có thể đổi màu, thêm phụ
+                                kiện, đổi bối cảnh bằng AI.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ Section -->
+            <div class="help-block">
+                <h3 class="help-block-title">
+                    <span class="material-symbols-outlined help-block-icon">quiz</span>
+                    <span data-i18n="help_page.faq_title">Câu hỏi thường gặp</span>
+                </h3>
+
+                <div id="help-faq-list" class="help-faq-list">
+                    <!-- FAQ 1 -->
+                    <div class="help-faq-item">
+                        <button class="help-faq-question">
+                            <span data-i18n="help_page.faq_q1">Gems là gì? Dùng làm gì?</span>
+                            <span class="material-symbols-outlined faq-chevron">expand_more</span>
+                        </button>
+                        <div class="help-faq-answer">
+                            <p data-i18n="help_page.faq_a1">Gems là đơn vị credits để thử đồ. Mỗi lần thử đồ tốn 1
+                                gem. Bạn có thể mua thêm gems qua gói Starter, Pro hoặc Premium.</p>
+                        </div>
+                    </div>
+
+                    <!-- FAQ 2 -->
+                    <div class="help-faq-item">
+                        <button class="help-faq-question">
+                            <span data-i18n="help_page.faq_q2">Ảnh mẫu cần đạt tiêu chuẩn gì?</span>
+                            <span class="material-symbols-outlined faq-chevron">expand_more</span>
+                        </button>
+                        <div class="help-faq-answer">
+                            <p data-i18n="help_page.faq_a2">Ảnh toàn thân, rõ nét, nền đơn giản, đứng thẳng, không
+                                che khuất cơ thể. Tránh ảnh cắt ngang hoặc quá mờ.</p>
+                        </div>
+                    </div>
+
+                    <!-- FAQ 3 -->
+                    <div class="help-faq-item">
+                        <button class="help-faq-question">
+                            <span data-i18n="help_page.faq_q3">Tại sao ảnh thử đồ không chính xác?</span>
+                            <span class="material-symbols-outlined faq-chevron">expand_more</span>
+                        </button>
+                        <div class="help-faq-answer">
+                            <p data-i18n="help_page.faq_a3">AI có thể tạo kết quả chưa hoàn hảo. Nếu ảnh sai, hãy
+                                bấm "Ảnh sai? Hoàn gem" để được hoàn lại gem. Thử dùng ảnh mẫu và ảnh quần áo chất
+                                lượng cao hơn.</p>
+                        </div>
+                    </div>
+
+                    <!-- FAQ 4 -->
+                    <div class="help-faq-item">
+                        <button class="help-faq-question">
+                            <span data-i18n="help_page.faq_q4">Dữ liệu và ảnh của tôi có an toàn không?</span>
+                            <span class="material-symbols-outlined faq-chevron">expand_more</span>
+                        </button>
+                        <div class="help-faq-answer">
+                            <p data-i18n="help_page.faq_a4">Có. Ảnh của bạn chỉ được dùng để xử lý thử đồ và không
+                                được lưu trữ vĩnh viễn trên server. Chúng tôi cam kết bảo vệ quyền riêng tư của bạn.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- FAQ 5 -->
+                    <div class="help-faq-item">
+                        <button class="help-faq-question">
+                            <span data-i18n="help_page.faq_q5">Tôi không thể lấy ảnh từ một số trang web?</span>
+                            <span class="material-symbols-outlined faq-chevron">expand_more</span>
+                        </button>
+                        <div class="help-faq-answer">
+                            <p data-i18n="help_page.faq_a5">Một số trang web bảo vệ ảnh của họ. Bạn có thể: (1) Lưu
+                                ảnh về máy rồi tải lên, (2) Chụp ảnh màn hình, hoặc (3) Copy địa chỉ ảnh và dán vào
+                                Fitly.</p>
+                        </div>
+                    </div>
+
+                    <!-- FAQ 6 -->
+                    <div class="help-faq-item">
+                        <button class="help-faq-question">
+                            <span data-i18n="help_page.faq_q6">Làm sao để đồng bộ dữ liệu giữa các thiết bị?</span>
+                            <span class="material-symbols-outlined faq-chevron">expand_more</span>
+                        </button>
+                        <div class="help-faq-answer">
+                            <p data-i18n="help_page.faq_a6">Đăng nhập bằng cùng một tài khoản (Google hoặc email)
+                                trên các thiết bị. Tủ đồ và gems của bạn sẽ tự động đồng bộ.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Support Section -->
+            <div class="help-block">
+                <h3 class="help-block-title">
+                    <span class="material-symbols-outlined help-block-icon">support_agent</span>
+                    <span data-i18n="help_page.contact_title">Liên hệ hỗ trợ</span>
+                </h3>
+
+                <div class="help-contact-card">
+                    <div class="help-contact-row">
+                        <span class="material-symbols-outlined help-contact-icon">mail</span>
+                        <div class="help-contact-info">
+                            <span class="help-contact-label" data-i18n="help_page.contact_email_label">Email hỗ
+                                trợ</span>
+                            <span class="help-contact-value">support@fitly.app</span>
+                        </div>
+                        <button id="help-copy-email-btn" class="help-copy-btn" title="Copy email">
+                            <span class="material-symbols-outlined">content_copy</span>
+                        </button>
+                    </div>
+                    <div class="help-contact-row">
+                        <span class="material-symbols-outlined help-contact-icon">schedule</span>
+                        <div class="help-contact-info">
+                            <span class="help-contact-label" data-i18n="help_page.response_time">Thời gian phản
+                                hồi</span>
+                            <span class="help-contact-value" data-i18n="help_page.response_value">Trong vòng 24
+                                giờ</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- About Section -->
+            <div class="help-block help-about">
+                <div class="help-about-row">
+                    <div class="help-about-logo">
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
+                            <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="currentColor" />
+                            <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                            <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </div>
+                    <div class="help-about-info">
+                        <span class="help-about-name">Fitly — Virtual Try-On</span>
+                        <span class="help-about-version" data-i18n="help_page.version_label">Phiên bản 1.0.0</span>
+                    </div>
+                </div>
+                <p class="help-about-tagline" data-i18n="help_page.tagline">AI-powered virtual try-on cho thời trang
+                    ✨</p>
+            </div>
+
+        </div>
+    </section>
+
+    </section>
+
+
+    <!-- Note: Result popups are now injected directly into the webpage for full-screen dragging -->
+
+    <!-- Loading Overlay - Fun Animation -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+        <div class="loading-content-wrapper">
+            <!-- Fun Fitting Room Animation -->
+            <div class="fun-loading-animation">
+                <div class="fitting-room">🚪</div>
+                <div class="clothes-in">
+                    <span class="cloth c-1">👕</span>
+                    <span class="cloth c-2">👗</span>
+                    <span class="cloth c-3">👖</span>
+                    <span class="cloth c-4">👟</span>
+                    <span class="cloth c-5">🕶️</span>
+                </div>
+                <div class="sparkles-out">
+                    <span class="spark s-1">✨</span>
+                    <span class="spark s-2">💖</span>
+                    <span class="spark s-3">🌟</span>
+                </div>
+            </div>
+
+            <!-- Text & Progress -->
+            <div class="loading-info">
+                <h3 id="loading-text" class="anime-title">Đang hô biến... ✨</h3>
+
+                <div class="magic-progress-container">
+                    <div class="magic-progress-bar">
+                        <div id="loading-progress-bar" class="magic-progress-fill" style="width: 0%"></div>
+                    </div>
+                    <div class="magic-sparkle-follower"></div>
+                </div>
+
+                <p id="loading-progress-text" class="anime-percent">0%</p>
+                <p id="loading-tip" class="anime-tip">💡 AI đang thử đồ cho bạn đó!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Overlay - Anime Style -->
+    <div id="success-overlay" class="loading-overlay hidden">
+        <div class="loading-content-wrapper success-wrapper">
+            <!-- Anime Character SVG (Happy/Celebratory) -->
+            <div class="anime-mascot">
+                <svg viewBox="0 0 200 200" class="chibi-character">
+                    <defs>
+                        <filter id="glowSuccess" x="-20%" y="-20%" width="140%" height="140%">
+                            <feGaussianBlur stdDeviation="3" result="blur" />
+                            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                        </filter>
+                        <linearGradient id="hairGradSuccess" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#FFD1DC" />
+                            <stop offset="100%" stop-color="#FF9EAA" />
+                        </linearGradient>
+                        <linearGradient id="dressGradSuccess" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#E0F7FA" />
+                            <stop offset="100%" stop-color="#B2EBF2" />
+                        </linearGradient>
+                    </defs>
+
+                    <!-- Glow effect behind -->
+                    <circle cx="100" cy="100" r="70" fill="rgba(255, 255, 255, 0.6)" filter="url(#glowSuccess)"
+                        class="mascot-glow" />
+
+                    <!-- Body (Dancing/Happy Pose) -->
+                    <path d="M85 130 Q100 135 115 130 L135 170 Q100 190 65 170 Z" fill="url(#dressGradSuccess)" />
+
+                    <!-- Head -->
+                    <circle cx="100" cy="90" r="45" fill="#FFE0BD" />
+
+                    <!-- Hair (Back) -->
+                    <path d="M60 90 Q50 150 40 160 Q80 150 100 150 Q120 150 160 160 Q150 150 140 90 Z"
+                        fill="url(#hairGradSuccess)" />
+
+                    <!-- Face (Happy Expression) -->
+                    <!-- Eyes (Closed Happy ^ ^) -->
+                    <path d="M75 95 Q82 85 89 95" fill="none" stroke="#5D4037" stroke-width="3"
+                        stroke-linecap="round" />
+                    <path d="M111 95 Q118 85 125 95" fill="none" stroke="#5D4037" stroke-width="3"
+                        stroke-linecap="round" />
+
+                    <!-- Blush -->
+                    <ellipse cx="75" cy="105" rx="6" ry="4" fill="#FFAB91" opacity="0.6" />
+                    <ellipse cx="125" cy="105" rx="6" ry="4" fill="#FFAB91" opacity="0.6" />
+
+                    <!-- Mouth (Big Smile) -->
+                    <path d="M90 110 Q100 120 110 110" fill="none" stroke="#A1887F" stroke-width="2"
+                        stroke-linecap="round" />
+
+                    <!-- Hair (Bangs) -->
+                    <path d="M55 90 Q60 50 100 45 Q140 50 145 90 Q140 70 100 75 Q60 70 55 90"
+                        fill="url(#hairGradSuccess)" />
+
+                    <!-- V Sign Hand -->
+                    <g transform="translate(135, 110) rotate(-20)">
+                        <path d="M0 0 L5 -15 L10 0 L15 -15 L20 0 L10 20 Z" fill="#FFE0BD" />
+                    </g>
+
+                    <!-- Sparkles/Hearts -->
+                    <g class="sparkles-group">
+                        <text x="140" y="70" font-size="24" fill="#FF4081" class="sparkle-1">♥</text>
+                        <text x="50" y="80" font-size="20" fill="#FFD700" class="sparkle-2">✨</text>
+                        <text x="160" y="130" font-size="18" fill="#FF8A80" class="sparkle-3">✨</text>
+                    </g>
+                </svg>
+            </div>
+
+            <!-- Success Text -->
+            <div class="loading-info">
+                <h3 class="anime-title success-title">Thành công! ✨</h3>
+
+                <p id="success-message-text" class="anime-tip success-message">
+                    Outfit này trông tuyệt vời!
+                </p>
+
+                <div class="success-actions">
+                    <button id="success-close-btn" class="btn btn-primary btn-sm">
+                        Xem kết quả
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Overlay - Anime Style -->
+    <div id="error-overlay" class="loading-overlay hidden">
+        <div class="loading-content-wrapper error-wrapper">
+            <!-- Anime Character SVG (Sad/Confused) -->
+            <div class="anime-mascot">
+                <svg viewBox="0 0 200 200" class="chibi-character">
+                    <!-- Reusing defs from loading if possible, or re-defining -->
+                    <defs>
+                        <linearGradient id="hairGradErr" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#FFD1DC" />
+                            <stop offset="100%" stop-color="#FF9EAA" />
+                        </linearGradient>
+                        <linearGradient id="dressGradErr" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stop-color="#E0F7FA" />
+                            <stop offset="100%" stop-color="#B2EBF2" />
+                        </linearGradient>
+                    </defs>
+
+                    <!-- Body (Same) -->
+                    <path d="M85 130 Q100 135 115 130 L125 180 Q100 190 75 180 Z" fill="url(#dressGradErr)" />
+
+                    <!-- Head (Same) -->
+                    <circle cx="100" cy="90" r="45" fill="#FFE0BD" />
+
+                    <!-- Hair (Back) (Same) -->
+                    <path d="M60 90 Q50 150 40 160 Q80 150 100 150 Q120 150 160 160 Q150 150 140 90 Z"
+                        fill="url(#hairGradErr)" />
+
+                    <!-- Face (Sad Expression) -->
+                    <!-- Eyes (X shape or tearing) -->
+                    <g class="sad-eyes">
+                        <text x="75" y="100" font-size="20" fill="#5D4037" font-family="monospace"
+                            font-weight="bold">&gt;</text>
+                        <text x="115" y="100" font-size="20" fill="#5D4037" font-family="monospace"
+                            font-weight="bold">&lt;&lt;</text>
+                    </g>
+
+                    <!-- Blush (Same) -->
+                    <ellipse cx="75" cy="105" rx="5" ry="3" fill="#FFAB91" opacity="0.6" />
+                    <ellipse cx="125" cy="105" rx="5" ry="3" fill="#FFAB91" opacity="0.6" />
+
+                    <!-- Mouth (Wavy/Sad) -->
+                    <path d="M90 115 Q100 110 110 115" fill="none" stroke="#A1887F" stroke-width="2"
+                        stroke-linecap="round" />
+
+                    <!-- Tear Drop Animation -->
+                    <path d="M70 105 Q65 115 70 120 Q75 115 70 105" fill="#81D4FA" class="tear-drop" opacity="0.8" />
+
+                    <!-- Hair (Bangs) (Same) -->
+                    <path d="M55 90 Q60 50 100 45 Q140 50 145 90 Q140 70 100 75 Q60 70 55 90"
+                        fill="url(#hairGradErr)" />
+
+                    <!-- Broken Wand / Question Mark -->
+                    <text x="140" y="100" font-size="32" fill="#FFAB91" class="question-mark">?</text>
+                </svg>
+            </div>
+
+            <!-- Error Text -->
+            <div class="loading-info">
+                <h3 class="anime-title error-title" data-i18n="error_overlay.title">Huhu, lỗi mất rồi... 🥺</h3>
+                <p class="anime-tip error-apology" data-i18n="error_overlay.apology">Mình xin lỗi bạn nhiều nha, thử lại
+                    giúp mình~</p>
+
+                <p id="error-message-text" class="anime-tip error-message">
+                    AI không thể xử lý ảnh này được.
+                </p>
+
+                <div class="error-actions">
+                    <button id="error-retry-btn" class="btn btn-primary btn-sm">
+                        <span class="material-symbols-outlined">refresh</span>
+                        Thử lại
+                    </button>
+                    <button id="error-close-btn" class="btn btn-secondary btn-sm">
+                        Đóng
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- === IMAGE LIGHTBOX (Fullscreen Zoom) === -->
+    <div id="image-lightbox" class="lightbox-overlay hidden">
+        <div class="lightbox-backdrop"></div>
+        <div class="lightbox-content">
+            <img id="lightbox-image" class="lightbox-image" src="" alt="Zoomed result" draggable="false" />
+        </div>
+        <div class="lightbox-controls">
+            <button id="lightbox-zoom-in" class="lightbox-btn" title="Phóng to">
+                <span class="material-symbols-outlined">zoom_in</span>
+            </button>
+            <button id="lightbox-zoom-out" class="lightbox-btn" title="Thu nhỏ">
+                <span class="material-symbols-outlined">zoom_out</span>
+            </button>
+            <button id="lightbox-reset" class="lightbox-btn" title="Reset">
+                <span class="material-symbols-outlined">fit_screen</span>
+            </button>
+            <button id="lightbox-download" class="lightbox-btn" title="Tải xuống">
+                <span class="material-symbols-outlined">download</span>
+            </button>
+        </div>
+        <button id="lightbox-close" class="lightbox-close-btn" title="Đóng (Esc)">
+            <span class="material-symbols-outlined">close</span>
+        </button>
+        <div class="lightbox-zoom-level" id="lightbox-zoom-level">100%</div>
+    </div>
+
+    <!-- === LIB: Third-party / shared scripts first === -->
+    <script src="../lib/icons.js"></script>
+    <script src="../lib/locales/en.js"></script>
+    <script src="../lib/locales/vi.js"></script>
+    <script src="../lib/locales/ja.js"></script>
+    <script src="../lib/locales/ko.js"></script>
+    <script src="../lib/locales/zh.js"></script>
+    <script src="../lib/locales/th.js"></script>
+    <script src="../lib/locales/id.js"></script>
+    <script src="../lib/locales/es.js"></script>
+    <script src="../lib/locales/fr.js"></script>
+    <script src="../lib/i18n.js"></script>
+    <script src="image_cache_db.js"></script>
+    <script src="gallery_helpers.js"></script>
+
+    <!-- === MODULES: Phải load theo thứ tự dependencies === -->
+    <!-- 0. Confirm Dialog - phụ thuộc: DOM body (no dependencies) -->
+    <script src="modules/confirm_dialog.js"></script>
+    <!-- 1. State & Config - phụ thuộc: window.i18n -->
+    <script src="modules/state_and_config.js"></script>
+    <!-- 2. Auth & Profile - phụ thuộc: state, elements -->
+    <script src="modules/manage_auth_and_profile.js"></script>
+    <!-- 3. Gems & Language Panel - phụ thuộc: state, t(), hideProfileMenu() -->
+    <script src="modules/manage_gems_and_language_panel.js"></script>
+    <!-- 3b. Purchase Gems Handler - phụ thuộc: supabase, state, t(), showGemsPanel() -->
+    <script src="modules/purchase_gems_handler.js"></script>
+    <!-- 4. User Models - phụ thuộc: state, updateUI() -->
+    <script src="modules/manage_user_models.js"></script>
+    <!-- 5. Clothing Items Selection - phụ thuộc: state, t(), updateUI() -->
+    <script src="modules/manage_selected_clothing_items.js"></script>
+    <!-- 6. Gallery & Results Render - phụ thuộc: state, t(), getTimeAgo() -->
+    <script src="modules/render_gallery_and_results.js"></script>
+    <!-- 7. Result Actions - phụ thuộc: state, addUserModel(), updateGalleryUI() -->
+    <script src="modules/handle_result_actions.js"></script>
+    <!-- 7b. Compare Outfit - phụ thuộc: state, handle_result_actions -->
+    <script src="modules/compare_outfit_side_by_side.js"></script>
+    <!-- 7c. Image Quality Validation - phụ thuộc: state, showToast(), t() -->
+    <script src="modules/validate_clothing_image_quality.js"></script>
+    <!-- 8. Try-On Processing - phụ thuộc: state, addResult(), loadUserModels() -->
+    <script src="modules/handle_tryon_processing.js"></script>
+    <!-- 9. Wardrobe Page - phụ thuộc: state, toggleClothingSelection() -->
+    <script src="modules/manage_wardrobe_page.js"></script>
+    <!-- 10. Event Listeners & Drag Drop - phụ thuộc: tất cả modules trên -->
+    <script src="modules/setup_event_listeners_and_drag_drop.js"></script>
+    <!-- 11. Image Lightbox - phụ thuộc: DOM elements #image-lightbox, #inline-result-image -->
+    <script src="modules/image_lightbox.js"></script>
+
+    <!-- 11b. Share Lookbook - phụ thuộc: state, showToast(), lookbook DOM -->
+    <script src="modules/manage_share_lookbook.js"></script>
+
+    <!-- 11c. Help Page - phụ thuộc: DOM elements #help-section, hideProfileMenu(), showToast() -->
+    <script src="modules/manage_help_page.js"></script>
+
+    <!-- 11d. All Outfits Page - phụ thuộc: state, showToast(), renderCreatedOutfitsList(), openCompareView(), openShareLookbook() -->
+    <script src="modules/manage_all_outfits_page.js"></script>
+
+    <!-- 12. Add Wardrobe Modal - phụ thuộc: state, showToast(), renderWardrobeGrid() -->
+    <script src="modules/handle_add_wardrobe_modal.js"></script>
+
+    <!-- ORCHESTRATOR: Khởi tạo tất cả modules -->
+    <script src="sidebar.js"></script>
+</body>
+
+</html>

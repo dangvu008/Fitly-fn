@@ -1,0 +1,19 @@
+# Environment variables (NEVER commit secrets)
+.env
+.env.*
+
+# Vendor bundles (rebuild bằng: npm run build:vendor)
+lib/supabase.js
+lib/supabase.min.js
+
+# Dependencies
+node_modules/
+
+# Supabase temp
+supabase/.temp/
+
+# OS & Editor
+.DS_Store
+*.swp
+*.swo
+*~

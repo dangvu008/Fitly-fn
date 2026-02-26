@@ -1,0 +1,93 @@
+{
+    "manifest_version": 3,
+    "name": "Fitly - Virtual Try-On",
+    "version": "1.0.0",
+    "description": "Fitly AI - Thử đồ ảo trực tiếp trên trình duyệt. Chuột phải vào ảnh quần áo để thử đồ ngay!",
+    "permissions": [
+        "activeTab",
+        "alarms",
+        "contextMenus",
+        "storage",
+        "sidePanel",
+        "notifications",
+        "windows",
+        "identity"
+    ],
+    "host_permissions": [
+        "<all_urls>"
+    ],
+    "background": {
+        "service_worker": "service_worker.js",
+        "type": "module"
+    },
+    "side_panel": {
+        "default_path": "sidebar/index.html"
+    },
+    "action": {
+        "default_popup": "popup/popup.html",
+        "default_icon": {
+            "16": "icons/icon16.png",
+            "48": "icons/icon48.png",
+            "128": "icons/icon128.png"
+        }
+    },
+    "icons": {
+        "16": "icons/icon16.png",
+        "48": "icons/icon48.png",
+        "128": "icons/icon128.png"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "lib/locales/en.js",
+                "lib/locales/vi.js",
+                "lib/locales/ja.js",
+                "lib/locales/ko.js",
+                "lib/locales/zh.js",
+                "lib/locales/th.js",
+                "lib/locales/id.js",
+                "lib/locales/es.js",
+                "lib/locales/fr.js",
+                "lib/i18n.js",
+                "content_scripts/inject_sidebar.js",
+                "content_scripts/google_login_overlay.js",
+                "content_scripts/detect_fashion_page.js",
+                "content_scripts/detect_clothing_image.js",
+                "content_scripts/inject_image_hover_button.js"
+            ],
+            "css": [
+                "content_scripts/sidebar.css"
+            ],
+            "run_at": "document_idle"
+        },
+        {
+            "matches": [
+                "http://localhost:3000/*",
+                "https://fitly.app/*"
+            ],
+            "js": [
+                "content_scripts/auth_listener.js"
+            ],
+            "run_at": "document_end"
+        }
+    ],
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "auth_callback.html",
+                "auth_callback.js",
+                "popup/result-popup.html",
+                "popup/popup.html",
+                "lib/*.js",
+                "extension/config.js",
+                "icons/*"
+            ],
+            "matches": [
+                "<all_urls>"
+            ]
+        }
+    ]
+}

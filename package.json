@@ -1,0 +1,21 @@
+{
+    "name": "@fitly/extension",
+    "version": "1.0.0",
+    "private": true,
+    "description": "Fitly Chrome Extension",
+    "scripts": {
+        "dev": "echo 'Load extension từ thư mục này trong Chrome'",
+        "build": "npm run build:vendor",
+        "build:vendor": "npx --yes esbuild /Users/adm/Desktop/project/fitly-fn/virtual-tryon/node_modules/@supabase/supabase-js/dist/index.mjs --bundle --minify --format=esm --outfile=lib/supabase.min.js",
+        "test": "vitest --run",
+        "test:watch": "vitest"
+    },
+    "dependencies": {
+        "@supabase/supabase-js": "^2.97.0"
+    },
+    "devDependencies": {
+        "@vitest/ui": "^1.2.0",
+        "jsdom": "^28.1.0",
+        "vitest": "^1.2.0"
+    }
+}

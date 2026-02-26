@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+  <!-- Wardrobe icon: closet with plus -->
+  <rect x="2" y="2" width="12" height="12" rx="1.5" stroke="#E8766A" stroke-width="1.5" fill="none"/>
+  <line x1="8" y1="2" x2="8" y2="14" stroke="#E8766A" stroke-width="1"/>
+  <circle cx="6" cy="8" r="0.8" fill="#E8766A"/>
+  <circle cx="10" cy="8" r="0.8" fill="#E8766A"/>
+</svg>

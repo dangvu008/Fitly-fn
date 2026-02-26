@@ -1,0 +1,567 @@
+/**
+ * File: sidebar.css (content_scripts)
+ * Purpose: Styles cho content script overlay elements
+ * Design: Minimal overlay UI matching Fitly web app design system
+ * 
+ * Note: These styles are injected into third-party websites,
+ * so they use !important to override site styles
+ */
+
+/* ===========================================
+   DESIGN TOKENS - Matching Web App
+   =========================================== */
+/* Colors */
+/* Primary: #f97316, #ec4899 */
+/* Background Dark: #0a0a0a, #1a1a1a */
+/* Success: #22c55e, Error: #ef4444, Warning: #f59e0b */
+/* Accent: #0095f6 */
+
+/* ===========================================
+   SELECTABLE IMAGES HIGHLIGHT
+   =========================================== */
+.vt-selectable {
+  outline: 3px solid #f97316 !important;
+  outline-offset: 2px !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease-out !important;
+  position: relative !important;
+}
+
+.vt-selectable:hover {
+  outline-width: 4px !important;
+  outline-color: #ec4899 !important;
+  transform: scale(1.02) !important;
+  box-shadow: 0 0 20px rgba(249, 115, 22, 0.4) !important;
+  z-index: 999998 !important;
+}
+
+/* Overlay effect on hover */
+.vt-selectable::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.1), rgba(236, 72, 153, 0.1)) !important;
+  opacity: 0 !important;
+  transition: opacity 0.15s ease-out !important;
+  pointer-events: none !important;
+}
+
+.vt-selectable:hover::before {
+  opacity: 1 !important;
+}
+
+/* ===========================================
+   TOOLTIP
+   =========================================== */
+.vt-tooltip {
+  position: fixed !important;
+  transform: translateX(-50%) !important;
+  background: linear-gradient(135deg, #f97316, #ec4899) !important;
+  color: white !important;
+  padding: 8px 16px !important;
+  border-radius: 9999px !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  z-index: 999999 !important;
+  box-shadow: 0 4px 16px rgba(249, 115, 22, 0.4) !important;
+  pointer-events: none !important;
+  white-space: nowrap !important;
+}
+
+.vt-tooltip::after {
+  content: '' !important;
+  position: absolute !important;
+  bottom: -6px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  border-left: 6px solid transparent !important;
+  border-right: 6px solid transparent !important;
+  border-top: 6px solid #ec4899 !important;
+}
+
+/* ===========================================
+   NOTIFICATION TOAST
+   =========================================== */
+.vt-notification {
+  position: fixed !important;
+  bottom: 24px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  background: #1a1a1a !important;
+  border: 1px solid #2a2a2a !important;
+  color: white !important;
+  padding: 14px 24px !important;
+  border-radius: 12px !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  z-index: 999999 !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4) !important;
+  animation: vt-slide-up 0.3s ease !important;
+}
+
+.vt-notification-success {
+  border-color: #22c55e !important;
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), #1a1a1a) !important;
+}
+
+.vt-notification-error {
+  border-color: #ef4444 !important;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), #1a1a1a) !important;
+}
+
+.vt-notification-warning {
+  border-color: #f59e0b !important;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), #1a1a1a) !important;
+}
+
+.vt-notification-icon {
+  font-size: 18px !important;
+}
+
+.vt-notification-text {
+  color: #f5f5f5 !important;
+}
+
+.vt-notification-hide {
+  animation: vt-slide-down 0.3s ease forwards !important;
+}
+
+@keyframes vt-slide-up {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@keyframes vt-slide-down {
+  from {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+}
+
+/* ===========================================
+   SELECTION MODE CURSOR
+   =========================================== */
+body.vt-selection-mode {
+  cursor: crosshair !important;
+}
+
+body.vt-selection-mode * {
+  cursor: inherit !important;
+}
+
+body.vt-selection-mode .vt-selectable {
+  cursor: pointer !important;
+}
+
+/* ===========================================
+   OVERLAY BACKGROUND
+   =========================================== */
+.vt-overlay {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background: rgba(0, 0, 0, 0.3) !important;
+  z-index: 999997 !important;
+  pointer-events: none !important;
+}
+
+/* ===========================================
+   HELP TEXT
+   =========================================== */
+.vt-help-text {
+  position: fixed !important;
+  top: 20px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  background: rgba(10, 10, 10, 0.9) !important;
+  color: white !important;
+  padding: 12px 24px !important;
+  border-radius: 8px !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-size: 13px !important;
+  z-index: 999999 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+  border: 1px solid #2a2a2a !important;
+}
+
+.vt-help-text kbd {
+  background: #2a2a2a !important;
+  padding: 2px 6px !important;
+  border-radius: 4px !important;
+  font-size: 11px !important;
+  margin: 0 2px !important;
+  border: 1px solid #3a3a3a !important;
+}
+
+/* ===========================================
+   MODAL STYLES
+   =========================================== */
+.vt-alt-modal,
+.vt-error-modal {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background: rgba(0, 0, 0, 0.7) !important;
+  backdrop-filter: blur(4px) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 2147483647 !important;
+  animation: vt-fade-in 0.2s ease !important;
+}
+
+.vt-alt-content,
+.vt-error-content {
+  background: #1a1a1a !important;
+  border: 1px solid #2a2a2a !important;
+  border-radius: 20px !important;
+  padding: 28px !important;
+  max-width: 420px !important;
+  width: 90% !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5) !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  animation: vt-scale-in 0.3s ease !important;
+}
+
+.vt-alt-header,
+.vt-error-header {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin-bottom: 16px !important;
+}
+
+.vt-alt-icon,
+.vt-error-icon {
+  font-size: 32px !important;
+}
+
+.vt-alt-header h3,
+.vt-error-header h3 {
+  color: #fff !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  margin: 0 !important;
+}
+
+.vt-alt-content p,
+.vt-error-content p {
+  color: #a1a1a1 !important;
+  font-size: 14px !important;
+  line-height: 1.6 !important;
+  margin: 0 0 20px 0 !important;
+}
+
+.vt-alt-options {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 12px !important;
+  margin-bottom: 20px !important;
+}
+
+.vt-alt-btn {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  padding: 14px 16px !important;
+  background: #1f1f1f !important;
+  border: 1px solid #2a2a2a !important;
+  border-radius: 12px !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease-out !important;
+  text-align: left !important;
+}
+
+.vt-alt-btn:hover {
+  background: #262626 !important;
+  border-color: #f97316 !important;
+  transform: translateX(4px) !important;
+}
+
+.vt-alt-btn-icon {
+  font-size: 24px !important;
+  flex-shrink: 0 !important;
+}
+
+.vt-alt-btn-text {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+}
+
+.vt-alt-btn-text strong {
+  color: #fff !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+}
+
+.vt-alt-btn-text small {
+  color: #737373 !important;
+  font-size: 12px !important;
+}
+
+.vt-alt-close,
+.vt-error-close {
+  width: 100% !important;
+  padding: 12px !important;
+  background: transparent !important;
+  border: 1px solid #2a2a2a !important;
+  border-radius: 10px !important;
+  color: #737373 !important;
+  font-size: 14px !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease-out !important;
+}
+
+.vt-alt-close:hover,
+.vt-error-close:hover {
+  background: #1f1f1f !important;
+  color: #fff !important;
+}
+
+/* ===========================================
+   ERROR MODAL SPECIFIC
+   =========================================== */
+.vt-error-suggestion {
+  background: rgba(249, 115, 22, 0.1) !important;
+  border: 1px solid rgba(249, 115, 22, 0.3) !important;
+  border-radius: 12px !important;
+  padding: 14px 16px !important;
+  margin-bottom: 20px !important;
+}
+
+.vt-error-suggestion strong {
+  color: #f97316 !important;
+  font-size: 13px !important;
+  display: block !important;
+  margin-bottom: 8px !important;
+}
+
+.vt-error-suggestion ol {
+  color: #a1a1a1 !important;
+  font-size: 13px !important;
+  margin: 0 !important;
+  padding-left: 20px !important;
+  line-height: 1.8 !important;
+}
+
+.vt-error-actions {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+}
+
+.vt-error-btn {
+  padding: 12px 16px !important;
+  border: none !important;
+  border-radius: 10px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease-out !important;
+}
+
+.vt-error-retry {
+  background: linear-gradient(135deg, #f97316, #ec4899) !important;
+  color: white !important;
+}
+
+.vt-error-retry:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 16px rgba(249, 115, 22, 0.4) !important;
+}
+
+.vt-error-use-anyway {
+  background: #1f1f1f !important;
+  color: #fff !important;
+  border: 1px solid #2a2a2a !important;
+}
+
+.vt-error-use-anyway:hover {
+  background: #262626 !important;
+}
+
+.vt-error-btn.vt-error-close {
+  background: transparent !important;
+  color: #737373 !important;
+  border: 1px solid #2a2a2a !important;
+}
+
+/* ===========================================
+   ANIMATIONS
+   =========================================== */
+@keyframes vt-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes vt-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ===========================================
+   FLOATING RESULT POPUP
+   =========================================== */
+.vt-floating-popup {
+  position: fixed !important;
+  z-index: 2147483646 !important;
+  background: #1a1a1a !important;
+  border: 1px solid #2a2a2a !important;
+  border-radius: 16px !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5) !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  animation: vt-scale-in 0.2s ease !important;
+  overflow: hidden !important;
+}
+
+.vt-floating-popup-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 12px 16px !important;
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.1), rgba(236, 72, 153, 0.1)) !important;
+  border-bottom: 1px solid #2a2a2a !important;
+  cursor: move !important;
+}
+
+.vt-floating-popup-title {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #fff !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+.vt-floating-popup-actions {
+  display: flex !important;
+  gap: 8px !important;
+}
+
+.vt-floating-popup-btn {
+  width: 28px !important;
+  height: 28px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #262626 !important;
+  border: 1px solid #3a3a3a !important;
+  border-radius: 6px !important;
+  color: #a1a1a1 !important;
+  font-size: 14px !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease-out !important;
+}
+
+.vt-floating-popup-btn:hover {
+  background: #333 !important;
+  color: #fff !important;
+}
+
+.vt-floating-popup-btn.close:hover {
+  background: #ef4444 !important;
+  border-color: #ef4444 !important;
+  color: #fff !important;
+}
+
+.vt-floating-popup-body {
+  padding: 12px !important;
+}
+
+.vt-floating-popup-body img {
+  width: 100% !important;
+  height: auto !important;
+  border-radius: 8px !important;
+  display: block !important;
+}
+
+.vt-floating-popup-footer {
+  display: flex !important;
+  gap: 8px !important;
+  padding: 12px 16px !important;
+  border-top: 1px solid #2a2a2a !important;
+}
+
+.vt-floating-popup-footer button {
+  flex: 1 !important;
+  padding: 10px !important;
+  border: none !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease-out !important;
+}
+
+.vt-floating-popup-footer .btn-primary {
+  background: linear-gradient(135deg, #f97316, #ec4899) !important;
+  color: white !important;
+}
+
+.vt-floating-popup-footer .btn-primary:hover {
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.4) !important;
+}
+
+.vt-floating-popup-footer .btn-secondary {
+  background: #262626 !important;
+  color: #fff !important;
+}
+
+.vt-floating-popup-footer .btn-secondary:hover {
+  background: #333 !important;
+}
+
+/* Resize handles for floating popup */
+.vt-floating-popup .resize-handle {
+  position: absolute !important;
+  background: transparent !important;
+}
+
+.vt-floating-popup .resize-handle.se {
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 16px !important;
+  height: 16px !important;
+  cursor: se-resize !important;
+}
+
+.vt-floating-popup .resize-handle.se::after {
+  content: '' !important;
+  position: absolute !important;
+  right: 4px !important;
+  bottom: 4px !important;
+  width: 8px !important;
+  height: 8px !important;
+  border-right: 2px solid #3a3a3a !important;
+  border-bottom: 2px solid #3a3a3a !important;
+}

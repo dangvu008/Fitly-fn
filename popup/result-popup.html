@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitly - Kết quả thử đồ</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet">
+    <style>
+        /* Design Tokens - Synced with Sidebar */
+        :root {
+            --font-family-heading: 'Playfair Display', serif;
+            --font-family-body: 'Manrope', sans-serif;
+            
+            --color-primary: #bcaaa4;
+            --color-primary-dark: #8d6e63;
+            --color-background: #fdfbf7;
+            --color-background-secondary: #f5f0eb;
+            --color-surface: #ffffff;
+            --color-foreground: #4a4a4a;
+            --color-foreground-secondary: #8d8d8d;
+            --color-border: #f5f5f4;
+            --color-border-dark: #e7e5e4;
+            
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 8px 24px rgba(141, 110, 99, 0.15);
+            
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-full: 9999px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family-body);
+            background: var(--color-background);
+            color: var(--color-foreground);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 16px;
+            height: 100vh;
+            max-width: 600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--color-border);
+            margin-bottom: 16px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            box-shadow: 0 2px 8px rgba(141, 110, 99, 0.3);
+        }
+
+        .header-title {
+            font-family: var(--font-family-heading);
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--color-primary-dark);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Toggle Button */
+        .toggle-btn {
+            padding: 8px 16px;
+            background: var(--color-surface);
+            color: var(--color-foreground);
+            font-family: var(--font-family-body);
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid var(--color-border-dark);
+            border-radius: var(--radius-full);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .toggle-btn:hover {
+            border-color: var(--color-primary);
+            color: var(--color-primary-dark);
+            background: var(--color-background-secondary);
+        }
+
+        /* Image Container */
+        .image-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--color-background-secondary);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            margin-bottom: 16px;
+            position: relative;
+            border: 1px solid var(--color-border);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .result-image,
+        .original-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        .original-image {
+            display: none;
+        }
+
+        /* Badge */
+        .image-badge {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(4px);
+            color: var(--color-primary-dark);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: var(--radius-full);
+            z-index: 10;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid rgba(141, 110, 99, 0.1);
+        }
+
+        .no-image {
+            text-align: center;
+            color: var(--color-foreground-secondary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .no-image span {
+            font-size: 48px;
+            opacity: 0.3;
+            color: var(--color-primary-dark);
+        }
+
+        /* Actions */
+        .actions {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            padding: 16px;
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--color-background-secondary);
+            border: 1px solid transparent;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--color-foreground-secondary);
+        }
+
+        .action-btn span {
+            font-size: 24px;
+        }
+
+        .action-btn:hover {
+            background: var(--color-surface);
+            border-color: var(--color-primary);
+            color: var(--color-primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .action-btn.primary {
+            background: var(--color-primary-dark);
+            color: white;
+            box-shadow: 0 4px 12px rgba(141, 110, 99, 0.3);
+        }
+
+        .action-btn.primary:hover {
+            background: #795548;
+            transform: translateY(-2px);
+        }
+
+        /* Product Link */
+        .product-link {
+            text-align: center;
+            padding: 12px;
+        }
+
+        .product-link a {
+            color: var(--color-primary-dark);
+            font-size: 13px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: var(--radius-full);
+            background: rgba(141, 110, 99, 0.05);
+            transition: background 0.2s;
+        }
+
+        .product-link a:hover {
+            background: rgba(141, 110, 99, 0.1);
+            text-decoration: none;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: var(--color-surface);
+            color: var(--color-foreground);
+            padding: 10px 20px;
+            border-radius: var(--radius-full);
+            font-size: 13px;
+            font-weight: 500;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 100;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--color-border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Tooltip */
+        #global-tooltip {
+            position: fixed;
+            padding: 6px 12px;
+            background: var(--color-primary-dark);
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            border-radius: 4px;
+            z-index: 9999;
+            pointer-events: none;
+            opacity: 0;
+            transform: translateY(5px);
+            transition: opacity 0.15s ease, transform 0.15s ease;
+            box-shadow: var(--shadow-md);
+            white-space: nowrap;
+        }
+
+        #global-tooltip.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        #global-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 5px;
+            border-style: solid;
+            border-color: var(--color-primary-dark) transparent transparent transparent;
+        }
+
+        #global-tooltip.bottom::after {
+            top: auto;
+            bottom: 100%;
+            border-color: transparent transparent var(--color-primary-dark) transparent;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-left">
+                <div class="logo-icon">
+                    <span class="material-symbols-outlined">checkroom</span>
+                </div>
+                <span class="header-title" id="result-name">Kết quả thử đồ</span>
+            </div>
+            <button class="toggle-btn" id="toggle-btn" style="display: none;" data-showing="after">
+                <span class="material-symbols-outlined" style="font-size: 16px;">compare</span>
+                Xem ảnh gốc
+            </button>
+        </div>
+
+        <div class="image-container" id="image-container">
+            <span class="image-badge" id="image-badge" style="display: none;"></span>
+            <div class="no-image" id="no-image">
+                <span class="material-symbols-outlined">image_not_supported</span>
+                <p>Chưa có hình ảnh</p>
+            </div>
+            <img class="result-image" id="result-image" src="" alt="Try-on Result" style="display: none;">
+            <img class="original-image" id="original-image" src="" alt="Original" style="display: none;">
+        </div>
+
+        <div class="actions">
+            <button class="action-btn" id="download-btn" title="Tải về">
+                <span class="material-symbols-outlined">download</span>
+            </button>
+            <button class="action-btn" id="copy-btn" title="Sao chép ảnh">
+                <span class="material-symbols-outlined">content_copy</span>
+            </button>
+            <button class="action-btn" id="share-btn" title="Chia sẻ">
+                <span class="material-symbols-outlined">share</span>
+            </button>
+            <button class="action-btn primary" id="visit-btn" title="Xem sản phẩm gốc">
+                <span class="material-symbols-outlined">shopping_bag</span>
+            </button>
+        </div>
+
+        <div class="product-link" id="product-link" style="display: none;">
+            <a href="#" id="source-link" target="_blank">
+                <span class="material-symbols-outlined" style="font-size: 16px;">open_in_new</span>
+                Xem sản phẩm trên web
+            </a>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        /**
+         * File: result-popup.html
+         * Updated: Modern Soft Aesthetic styling
+         */
+
+        // Parse URL params
+        const params = new URLSearchParams(window.location.search);
+        const imageUrl = decodeURIComponent(params.get('imageUrl') || '');
+        const name = decodeURIComponent(params.get('name') || 'Kết quả');
+        const sourceUrl = decodeURIComponent(params.get('sourceUrl') || '');
+        const modelUrl = decodeURIComponent(params.get('modelUrl') || '');
+        const resultId = decodeURIComponent(params.get('id') || '');
+
+        // Set title
+        document.getElementById('result-name').textContent = name;
+        document.title = `Fitly - ${name}`;
+
+        // Set result image
+        const resultImage = document.getElementById('result-image');
+        const originalImage = document.getElementById('original-image');
+        const noImage = document.getElementById('no-image');
+        const badge = document.getElementById('image-badge');
+
+        if (imageUrl) {
+            resultImage.src = imageUrl;
+            resultImage.style.display = 'block';
+            noImage.style.display = 'none';
+            badge.textContent = 'Kết quả';
+            badge.style.display = 'block';
+        }
+
+        // Set original/model image and show toggle if available
+        const toggleBtn = document.getElementById('toggle-btn');
+        if (modelUrl) {
+            originalImage.src = modelUrl;
+            toggleBtn.style.display = 'flex';
+        }
+
+        // Before/After toggle
+        let isShowingAfter = true;
+        toggleBtn.addEventListener('click', () => {
+            if (isShowingAfter) {
+                // Show before (original)
+                resultImage.style.display = 'none';
+                originalImage.style.display = 'block';
+                toggleBtn.innerHTML = '<span class="material-symbols-outlined" style="font-size: 16px;">auto_fix_high</span> Xem kết quả';
+                badge.textContent = 'Ảnh gốc';
+                isShowingAfter = false;
+            } else {
+                // Show after (result)
+                resultImage.style.display = 'block';
+                originalImage.style.display = 'none';
+                toggleBtn.innerHTML = '<span class="material-symbols-outlined" style="font-size: 16px;">compare</span> Xem ảnh gốc';
+                badge.textContent = 'Kết quả';
+                isShowingAfter = true;
+            }
+        });
+
+        // Set source link
+        if (sourceUrl) {
+            const productLink = document.getElementById('product-link');
+            const sourceLink = document.getElementById('source-link');
+            productLink.style.display = 'block';
+            sourceLink.href = sourceUrl;
+        }
+
+        // Toast function
+        function showToast(message, icon = 'check_circle') {
+            const toast = document.getElementById('toast');
+            toast.innerHTML = `<span class="material-symbols-outlined" style="font-size: 18px;">${icon}</span> ${message}`;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        // Get current visible image URL
+        function getCurrentImageUrl() {
+            return isShowingAfter ? imageUrl : modelUrl;
+        }
+
+        // Download
+        document.getElementById('download-btn').addEventListener('click', async () => {
+            const url = getCurrentImageUrl();
+            if (!url) return showToast('Không có ảnh', 'error');
+
+            try {
+                const response = await fetch(url);
+                const blob = await response.blob();
+                const blobUrl = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                link.download = `fitly-${Date.now()}.png`;
+                link.click();
+                URL.revokeObjectURL(blobUrl);
+                showToast('Đã tải ảnh về!');
+            } catch (e) {
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `fitly-${Date.now()}.png`;
+                link.click();
+                showToast('Đã tải ảnh về!');
+            }
+        });
+
+        // Copy
+        document.getElementById('copy-btn').addEventListener('click', async () => {
+            const url = getCurrentImageUrl();
+            if (!url) return showToast('Không có ảnh', 'error');
+
+            try {
+                const response = await fetch(url);
+                const blob = await response.blob();
+                await navigator.clipboard.write([
+                    new ClipboardItem({ 'image/png': blob })
+                ]);
+                showToast('Đã sao chép ảnh!');
+            } catch (e) {
+                try {
+                    await navigator.clipboard.writeText(url);
+                    showToast('Đã sao chép link!');
+                } catch (e2) {
+                    showToast('Không thể sao chép', 'error');
+                }
+            }
+        });
+
+        // Share
+        document.getElementById('share-btn').addEventListener('click', async () => {
+            try {
+                if (navigator.share) {
+                    await navigator.share({
+                        title: 'Fitly - Virtual Try-on',
+                        text: 'Xem bộ trang phục này nhé! 👕',
+                        url: sourceUrl || window.location.href
+                    });
+                } else {
+                    await navigator.clipboard.writeText(sourceUrl || window.location.href);
+                    showToast('Đã sao chép link!');
+                }
+            } catch (e) {
+                if (e.name !== 'AbortError') {
+                    showToast('Không thể chia sẻ', 'error');
+                }
+            }
+        });
+
+        // Visit product
+        document.getElementById('visit-btn').addEventListener('click', () => {
+            if (sourceUrl) {
+                window.open(sourceUrl, '_blank');
+            } else {
+                showToast('Không có link sản phẩm', 'error');
+            }
+        });
+
+        // Tooltip System
+        function initTooltipSystem() {
+            let tooltip = document.getElementById('global-tooltip');
+            if (!tooltip) {
+                tooltip = document.createElement('div');
+                tooltip.id = 'global-tooltip';
+                document.body.appendChild(tooltip);
+            }
+
+            document.addEventListener('mouseover', (e) => {
+                const target = e.target.closest('[title], [data-tooltip]');
+                if (!target) return;
+
+                const title = target.getAttribute('title');
+                if (title) {
+                    target.setAttribute('data-tooltip', title);
+                    target.setAttribute('data-original-title', title);
+                    target.removeAttribute('title');
+                }
+
+                const tooltipText = target.getAttribute('data-tooltip');
+                if (tooltipText) {
+                    showGlobalTooltip(target, tooltipText);
+                }
+            });
+
+            document.addEventListener('mouseout', (e) => {
+                const target = e.target.closest('[data-tooltip]');
+                if (target) {
+                    const originalTitle = target.getAttribute('data-original-title');
+                    if (originalTitle) {
+                        target.setAttribute('title', originalTitle);
+                        target.removeAttribute('data-original-title');
+                    }
+                    hideGlobalTooltip();
+                }
+            });
+        }
+
+        function showGlobalTooltip(element, text) {
+            const tooltip = document.getElementById('global-tooltip');
+            if (!tooltip) return;
+
+            tooltip.textContent = text;
+            tooltip.classList.add('visible');
+
+            const rect = element.getBoundingClientRect();
+            const tooltipRect = tooltip.getBoundingClientRect();
+
+            let top = rect.top - tooltipRect.height - 8;
+            let left = rect.left + (rect.width / 2) - (tooltipRect.width / 2);
+
+            if (top < 0) {
+                top = rect.bottom + 8;
+                tooltip.classList.add('bottom');
+            } else {
+                tooltip.classList.remove('bottom');
+            }
+
+            if (left < 4) left = 4;
+            if (left + tooltipRect.width > window.innerWidth - 4) {
+                left = window.innerWidth - tooltipRect.width - 4;
+            }
+
+            tooltip.style.top = `${top}px`;
+            tooltip.style.left = `${left}px`;
+        }
+
+        function hideGlobalTooltip() {
+            const tooltip = document.getElementById('global-tooltip');
+            if (tooltip) {
+                tooltip.classList.remove('visible');
+            }
+        }
+
+        initTooltipSystem();
+    </script>
+</body>
+
+</html>

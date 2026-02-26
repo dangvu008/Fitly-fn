@@ -1,0 +1,150 @@
+# Implementation Plan
+
+## Overview
+Fix JWT token expiration bug during try-on processing by adding proactive token refresh and retry mechanism to `callEdgeFunction()`.
+
+---
+
+- [x] 1. Write bug condition exploration test
+  - **Property 1: Fault Condition** - Token Expiration During Edge Function Calls
+  - **CRITICAL**: This test MUST FAIL on unfixed code - failure confirms the bug exists
+  - **DO NOT attempt to fix the test or the code when it fails**
+  - **NOTE**: This test encodes the expected behavior - it will validate the fix when it passes after implementation
+  - **GOAL**: Surface counterexamples that demonstrate the bug exists
+  - **Scoped PBT Approach**: Test concrete failing cases with token TTL < 180s for Edge Function calls
+  - Create test file: `tests/token_expiration_during_tryon.test.js`
+  - Test Case 1: Token với TTL = 120s, mock `process-tryon` mất 150s → expect 401 error
+  - Test Case 2: Token với TTL = 30s, gọi `callEdgeFunction('process-tryon')` → expect 401 ngay lập tức
+  - Test Case 3: Token với TTL = 60s, gọi 3 `upload-image` concurrent → expect 1-2 calls fail với 401
+  - Mock `chrome.storage.local.get()` để return token với TTL cụ thể
+  - Mock Edge Function responses để simulate processing time và 401 errors
+  - Run test on UNFIXED code
+  - **EXPECTED OUTCOME**: Test FAILS (this is correct - it proves the bug exists)
+  - Document counterexamples found:
+    - Token không được refresh trước Edge Function call
+    - 401 error không trigger retry
+    - User bị logout ngay lập tức
+  - Mark task complete when test is written, run, and failure is documented
+  - _Requirements: 1.1, 1.2, 1.3_
+
+- [x] 2. Write preservation property tests (BEFORE implementing fix)
+  - **Property 2: Preservation** - Non-Edge-Function Behavior Unchanged
+  - **IMPORTANT**: Follow observation-first methodology
+  - Create test file: `tests/token_refresh_preservation.test.js`
+  - Observe behavior on UNFIXED code for non-buggy inputs:
+    - Direct Supabase queries với token TTL > 5 phút → không có proactive refresh
+    - Manual logout flow → logout ngay lập tức, không refresh token
+    - Token refresh khi TTL < 10 phút trong `getAuthToken()` → refresh như cũ
+    - Demo mode logic → không check token
+  - Write property-based tests capturing observed behavior patterns:
+    - Property: For all direct Supabase queries (not Edge Functions), behavior unchanged
+    - Property: For all manual logout actions, session cleared immediately
+    - Property: For all token refresh with TTL < 10 min, refresh triggered as before
+    - Property: For all demo mode checks, token validation skipped
+  - Property-based testing generates many test cases for stronger guarantees
+  - Run tests on UNFIXED code
+  - **EXPECTED OUTCOME**: Tests PASS (this confirms baseline behavior to preserve)
+  - Mark task complete when tests are written, run, and passing on unfixed code
+  - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
+
+- [x] 3. Fix for JWT token expiration during try-on processing
+
+  - [x] 3.1 Implement proactive token refresh and retry logic in `callEdgeFunction()`
+    - File: `lib/supabase_service.js`
+    - Import `forceRefreshToken()` từ `background/auth_state_manager.js`
+    - Thêm proactive token refresh TRƯỚC khi lấy auth header:
+      - Gọi `forceRefreshToken()` nếu token TTL < 5 phút (300s)
+      - Đảm bảo token có TTL tối thiểu 300s trước mỗi Edge Function call
+      - Log token TTL trước và sau refresh
+    - Thêm retry logic với 401:
+      - Wrap fetch call trong try-catch
+      - Nếu response.status === 401:
+        - Gọi `forceRefreshToken()` để lấy token mới
+        - Retry request với token mới (chỉ 1 lần)
+        - Nếu retry vẫn 401 → throw error với errorCode = 'AUTH_EXPIRED'
+      - Log retry attempts
+    - Thêm timeout protection:
+      - Set timeout cho Edge Function calls (mặc định 180s)
+      - Nếu timeout → throw error với errorCode = 'TIMEOUT'
+    - Thêm concurrent call protection:
+      - Sử dụng mutex pattern từ `_refreshPromise` trong `auth_state_manager.js`
+      - Đảm bảo chỉ 1 refresh call active tại 1 thời điểm
+    - Throw error với errorCode rõ ràng: 'AUTH_EXPIRED', 'TIMEOUT', 'NETWORK_ERROR'
+    - _Bug_Condition: isBugCondition(input) where input.apiCall.functionName IN ['process-tryon', 'upload-image', 'get-tryon-status'] AND input.tokenTTL < input.apiCall.estimatedDuration_
+    - _Expected_Behavior: callEdgeFunction() SHALL automatically refresh token when TTL < 300s AND retry once on 401 with fresh token_
+    - _Preservation: Non-Edge-Function calls (direct Supabase queries) SHALL behave exactly as before_
+    - _Requirements: 2.1, 2.2, 2.3, 2.4_
+
+  - [x] 3.2 Export `forceRefreshToken()` and add TTL check in `auth_state_manager.js`
+    - File: `background/auth_state_manager.js`
+    - Export `forceRefreshToken()` function để `supabase_service.js` có thể import
+    - Thêm TTL check trong `forceRefreshToken()`:
+      - Lấy token hiện tại từ storage
+      - Parse JWT để lấy expiry time
+      - Tính TTL = expiry - current time
+      - Nếu TTL > 5 phút (300s) → return token hiện tại (không cần refresh)
+      - Nếu TTL <= 5 phút → proceed với refresh logic hiện tại
+    - Thêm error handling:
+      - Throw error rõ ràng khi refresh fail (không chỉ return null)
+      - Error message phải chứa errorCode = 'REFRESH_FAILED'
+    - Log TTL check results
+    - _Bug_Condition: Token với TTL < 300s không được refresh trước Edge Function call_
+    - _Expected_Behavior: forceRefreshToken() SHALL return current token if TTL > 300s, else refresh_
+    - _Preservation: Existing refresh logic in getAuthToken() SHALL remain unchanged_
+    - _Requirements: 2.1, 2.2_
+
+  - [x] 3.3 Update error handling in `handle_tryon_processing.js`
+    - File: `sidebar/modules/handle_tryon_processing.js`
+    - Xử lý error code thay vì keyword matching:
+      - Kiểm tra `response.errorCode` thay vì search "hết hạn" trong error message
+      - Phân biệt error types:
+        - `AUTH_EXPIRED` → logout user (gọi logout flow)
+        - `TIMEOUT` → show warning "Xử lý quá lâu, vui lòng thử lại", KHÔNG logout
+        - `NETWORK_ERROR` → show warning "Lỗi kết nối, vui lòng thử lại", KHÔNG logout
+        - Other errors → show error overlay, KHÔNG logout
+    - Remove false-positive logout:
+      - Xóa logic logout dựa trên keyword "hết hạn" trong error message
+      - Chỉ logout khi errorCode === 'AUTH_EXPIRED'
+    - Update error messages để rõ ràng hơn
+    - _Bug_Condition: User bị logout không cần thiết khi gặp timeout hoặc network error_
+    - _Expected_Behavior: Only logout when errorCode === 'AUTH_EXPIRED', show warnings for other errors_
+    - _Preservation: Manual logout flow SHALL remain unchanged_
+    - _Requirements: 2.4, 3.4_
+
+  - [x] 3.4 Verify bug condition exploration test now passes
+    - **Property 1: Expected Behavior** - Token Auto-Refresh and Retry Works
+    - **IMPORTANT**: Re-run the SAME test from task 1 - do NOT write a new test
+    - The test from task 1 encodes the expected behavior
+    - When this test passes, it confirms the expected behavior is satisfied
+    - Run bug condition exploration test from step 1: `tests/token_expiration_during_tryon.test.js`
+    - **EXPECTED OUTCOME**: Test PASSES (confirms bug is fixed)
+    - Verify:
+      - Token với TTL < 300s được refresh trước Edge Function call
+      - 401 error triggers retry với fresh token
+      - User không bị logout khi retry thành công
+    - _Requirements: 2.1, 2.2, 2.3_
+
+  - [x] 3.5 Verify preservation tests still pass
+    - **Property 2: Preservation** - Non-Edge-Function Behavior Unchanged
+    - **IMPORTANT**: Re-run the SAME tests from task 2 - do NOT write new tests
+    - Run preservation property tests from step 2: `tests/token_refresh_preservation.test.js`
+    - **EXPECTED OUTCOME**: Tests PASS (confirms no regressions)
+    - Verify:
+      - Direct Supabase queries hoạt động như cũ
+      - Manual logout flow hoạt động như cũ
+      - Token refresh < 10 min hoạt động như cũ
+      - Demo mode logic hoạt động như cũ
+    - Confirm all tests still pass after fix (no regressions)
+    - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5_
+
+- [x] 4. Checkpoint - Ensure all tests pass
+  - Run all tests: `npm test` hoặc test runner tương ứng
+  - Verify:
+    - Bug condition exploration test passes (task 1 test)
+    - Preservation property tests pass (task 2 tests)
+    - No new errors or warnings
+  - Manual testing:
+    - Test try-on với token sắp hết hạn → verify không có 401 error
+    - Test concurrent uploads → verify không có race condition
+    - Test manual logout → verify hoạt động như cũ
+  - Ask user if any questions arise or if additional testing is needed
