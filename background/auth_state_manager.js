@@ -258,10 +258,14 @@ async function _tryStorageRescue(storageKey, label) {
  * @param {boolean} bypassTTL - Nếu true, BỎ QUA TTL check và force refresh luôn (dùng khi call API bị 401/403)
  */
 export async function forceRefreshToken(bypassTTL = false) {
+    // Quick check: if no session in memory AND no token in storage → user not logged in
+    // Skip all refresh attempts to avoid noisy console warnings
+    let hasMemorySession = false;
     if (!bypassTTL) {
         try {
             const { data: { session } } = await supabase.auth.getSession();
             if (session?.access_token) {
+                hasMemorySession = true;
                 const expiresAtMs = session.expires_at ? session.expires_at * 1000 : 0;
                 const ttl = Math.floor((expiresAtMs - Date.now()) / 1000);
 
@@ -273,9 +277,20 @@ export async function forceRefreshToken(bypassTTL = false) {
         } catch (e) {
             console.warn('[forceRefreshToken] getSession error:', e.message);
         }
+
+        // No session in memory → check storage before attempting expensive refresh
+        if (!hasMemorySession) {
+            try {
+                const stored = await chrome.storage.local.get('fitly-auth-token');
+                if (!stored['fitly-auth-token']) {
+                    // No session anywhere — user is not logged in, return silently
+                    return null;
+                }
+            } catch (_) { }
+        }
     }
 
-    // TTL < 15 min or no session → force refresh
+    // TTL < 15 min or has stored session → try refresh
     const freshToken = await refreshAuthToken();
     if (freshToken) return freshToken;
 
