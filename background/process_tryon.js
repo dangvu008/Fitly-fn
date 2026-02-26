@@ -272,7 +272,7 @@ export async function handleProcessTryOn(data) {
             let retryRefreshErr = null;
             let newAccessToken;
             try {
-                newAccessToken = await forceRefreshToken();
+                newAccessToken = await forceRefreshToken(true);
                 console.log('[DEBUG-BG-TRYON] Force refresh for retry result:', newAccessToken ? 'GOT TOKEN' : 'NULL');
             } catch (refreshErr) {
                 console.error('[DEBUG-BG-TRYON] ❌ forceRefreshToken threw on retry:', refreshErr);

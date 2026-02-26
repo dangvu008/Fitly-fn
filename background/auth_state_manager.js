@@ -239,21 +239,24 @@ async function _doRefresh() {
 /**
  * forceRefreshToken() — Force refresh trước expensive operations.
  * Nếu TTL >= 15 phút → trả token hiện tại (đủ fresh).
+ * @param {boolean} bypassTTL - Nếu true, BỎ QUA TTL check và force refresh luôn (dùng khi call API bị 401/403)
  */
-export async function forceRefreshToken() {
-    try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.access_token) {
-            const expiresAtMs = session.expires_at ? session.expires_at * 1000 : 0;
-            const ttl = Math.floor((expiresAtMs - Date.now()) / 1000);
+export async function forceRefreshToken(bypassTTL = false) {
+    if (!bypassTTL) {
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session?.access_token) {
+                const expiresAtMs = session.expires_at ? session.expires_at * 1000 : 0;
+                const ttl = Math.floor((expiresAtMs - Date.now()) / 1000);
 
-            // TTL >= 15 min → no need to refresh
-            if (ttl >= 900) {
-                return session.access_token;
+                // TTL >= 15 min → no need to refresh
+                if (ttl >= 900) {
+                    return session.access_token;
+                }
             }
+        } catch (e) {
+            console.warn('[forceRefreshToken] getSession error:', e.message);
         }
-    } catch (e) {
-        console.warn('[forceRefreshToken] getSession error:', e.message);
     }
 
     // TTL < 15 min or no session → force refresh

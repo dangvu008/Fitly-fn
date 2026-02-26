@@ -430,7 +430,7 @@ export async function handleGetAuthState() {
         const profileData = await fetchProfileFromSupabase(session.access_token);
         if (profileData) {
             startAutoSync();
-            return { success: true, authenticated: true, ...profileData };
+            return { success: true, authenticated: true, user: session.user, ...profileData };
         }
 
         return {
