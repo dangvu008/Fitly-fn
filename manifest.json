@@ -1,7 +1,6 @@
 {
     "manifest_version": 3,
     "name": "Fitly - Virtual Try-On",
-    "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApQ3YAcwbLtyxOwV137l4zb3MTucOchvRJC0N4b9I4OLLD2JFDcM76saBqNQJUS27xYlfSn0sngRR22gIUdfDyVRqak4urv546FTWMEigToC4KY7KeSFIAratmMqWs1jM1srIIBwRlYz8RksTqbOV0rCDMS7jgyhua9kqHLHzxiyY5a25OqMqL/rdbOkEQIVlti2vWM7laD1FwfRAbL7oX7LEN1uDYdoPQQQHXBZjPaibBzDEU7zjrGOK8uND+NPBicXRWb80ixOmXxm/MqdMWvOlaiwZS3XBRexxwDnhKwSP9MHnij8/6N4lsBYbKiV8nb97RXIYzRJ6ClIi1/HejQIDAQAB",
     "version": "1.0.0",
     "description": "Fitly AI - Thử đồ ảo trực tiếp trên trình duyệt. Chuột phải vào ảnh quần áo để thử đồ ngay!",
     "permissions": [
