@@ -333,13 +333,22 @@ export async function handleProcessTryOn(data) {
         // STEP 8: Xử lý các lỗi khác (non-auth)
         if (!response.ok) {
             const errorResult = await response.json().catch(() => ({}));
+            console.error('[DEBUG-BG-TRYON] ❌ Edge Function error:', response.status, JSON.stringify(errorResult));
             return {
                 success: false,
                 error: errorResult.message || errorResult.error || `Lỗi AI try-on (${response.status})`,
+                errorCode: errorResult.error || undefined,
             };
         }
 
         const result = await response.json();
+        console.log('[DEBUG-BG-TRYON] ✅ Edge Function result:', {
+            tryon_id: result.tryon_id,
+            result_image_url: result.result_image_url?.substring(0, 80),
+            cached: result.cached,
+            gems_used: result.gems_used,
+            processing_time_ms: result.processing_time_ms,
+        });
 
         // STEP 9: Lưu clothing vào recent history
         if (clothingImages.length > 0) {

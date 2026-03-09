@@ -60,16 +60,30 @@ async function validateImageUrl(imageUrl, timeout = 20000) {
     });
 }
 
-async function validateTryOnResult(resultImageUrl) {
+async function validateTryOnResult(resultImageUrl, modelImageUrl) {
     // STEP 1: Try validation lần đầu (20s timeout)
     let validation = await validateImageUrl(resultImageUrl);
-    if (validation.valid) return { valid: true };
+    if (validation.valid) {
+        // STEP 1b: Check if result URL is identical to model image URL
+        // This catches the case where AI returned the input image unchanged
+        if (modelImageUrl && resultImageUrl === modelImageUrl) {
+            console.error('[validateTryOnResult] Result URL is identical to model image URL — AI failed to apply clothing');
+            return { valid: false, error: 'AI không thay đổi được trang phục. Hãy thử lại hoặc dùng ảnh quần áo khác.' };
+        }
+        return { valid: true };
+    }
 
     // STEP 2: Retry lần 2 nếu timeout — Replicate CDN đôi khi chậm lần đầu
     console.warn('[validateTryOnResult] First attempt failed:', validation.error, '— retrying...');
     await new Promise(r => setTimeout(r, 2000)); // Wait 2s before retry
     validation = await validateImageUrl(resultImageUrl, 30000); // 30s timeout for retry
-    if (validation.valid) return { valid: true };
+    if (validation.valid) {
+        if (modelImageUrl && resultImageUrl === modelImageUrl) {
+            console.error('[validateTryOnResult] Result URL is identical to model image URL — AI failed to apply clothing');
+            return { valid: false, error: 'AI không thay đổi được trang phục. Hãy thử lại hoặc dùng ảnh quần áo khác.' };
+        }
+        return { valid: true };
+    }
 
     return { valid: false, error: `Ảnh kết quả lỗi: ${validation.error}. Gems sẽ không bị trừ.` };
 }
@@ -163,7 +177,7 @@ async function processTryOn(event) {
             updateProgress(95);
             if (elements.loadingText) elements.loadingText.textContent = t('checking_image');
 
-            const imageValidation = await validateTryOnResult(response.result_image_url);
+            const imageValidation = await validateTryOnResult(response.result_image_url, state.modelImage);
 
             if (!imageValidation.valid) {
                 console.error('[Fitly] Result image validation failed, requesting refund...');
@@ -217,6 +231,13 @@ async function processTryOn(event) {
                 const networkMsg = 'Lỗi kết nối. Vui lòng kiểm tra mạng và thử lại.';
                 showToast(networkMsg, 'warning');
                 showErrorOverlay(true, errorMessage || networkMsg);
+                return;
+            }
+
+            if (errorCode === 'UNCHANGED_RESULT') {
+                // AI returned model image unchanged — gems already refunded by server
+                showToast(errorMessage, 'warning');
+                showErrorOverlay(true, errorMessage);
                 return;
             }
 

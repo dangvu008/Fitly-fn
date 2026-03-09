@@ -74,10 +74,40 @@ async function pollReplicatePrediction(
   throw new Error('Replicate prediction timeout sau 180 giây')
 }
 
-function extractResultUrl(output: string | string[] | null | undefined): string {
+function extractResultUrl(output: string | string[] | null | undefined, inputImageUrls?: string[]): string {
   if (!output) throw new Error('Replicate không trả về output')
   if (typeof output === 'string') return output
-  if (Array.isArray(output) && output.length > 0) return output[0]
+  if (Array.isArray(output) && output.length > 0) {
+    // For Gemini models, output array may contain mixed content:
+    // - Text responses (plain strings or .txt file URLs)
+    // - Input images echoed back
+    // - The actual generated result image (typically last)
+    // Strategy: filter to image URLs, exclude any that match input images, take the last one
+    const imageUrls = output.filter(url => {
+      if (typeof url !== 'string') return false
+      if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('data:')) return false
+      if (url.endsWith('.txt') || url.endsWith('.json')) return false
+      return true
+    })
+
+    // Remove any URLs that match input images (model/clothing) to avoid returning the input as result
+    const inputSet = new Set(inputImageUrls || [])
+    const nonInputImages = imageUrls.filter(url => !inputSet.has(url))
+
+    if (nonInputImages.length > 0) {
+      // Take the LAST non-input image — generated result is typically the final output
+      console.log(`[extractResultUrl] Found ${nonInputImages.length} non-input image(s) in output array of ${output.length}`)
+      return nonInputImages[nonInputImages.length - 1]
+    }
+    if (imageUrls.length > 0) {
+      // Fallback: all images matched inputs, take the last image URL
+      console.log(`[extractResultUrl] WARNING: All ${imageUrls.length} image URLs matched input images, using last one`)
+      return imageUrls[imageUrls.length - 1]
+    }
+    // Last resort: return last element of array
+    console.log(`[extractResultUrl] WARNING: No image URLs found in output array, using last element`)
+    return output[output.length - 1]
+  }
   throw new Error('Replicate output format không hợp lệ')
 }
 
@@ -800,6 +830,17 @@ CRITICAL CONSTRAINTS:
           prediction = await pollReplicatePrediction(replicateApiKey, prediction.id, 180000, 3000)
         }
         console.log(`[process-tryon] ✅ Prediction succeeded: id=${prediction.id}`)
+        // Log output format for debugging result extraction
+        const outputType = Array.isArray(prediction.output) ? `array[${prediction.output.length}]` : typeof prediction.output
+        console.log(`[process-tryon] Output type: ${outputType}`)
+        if (Array.isArray(prediction.output)) {
+          prediction.output.forEach((item, i) => {
+            const preview = typeof item === 'string' ? item.substring(0, 80) : String(item)
+            console.log(`[process-tryon] Output[${i}]: ${preview}...`)
+          })
+        } else if (typeof prediction.output === 'string') {
+          console.log(`[process-tryon] Output: ${prediction.output.substring(0, 80)}...`)
+        }
         lastReplicateError = null
         break // Success — exit retry loop
       } catch (replicateError) {
@@ -846,8 +887,28 @@ CRITICAL CONSTRAINTS:
       })
     }
 
-    // 11. Extract + upload result
-    const resultImageUrl_replicate = extractResultUrl(prediction.output)
+    // 11. Extract + upload result — validate that result is not the same as input
+    const resultImageUrl_replicate = extractResultUrl(prediction.output, allImageUrls)
+
+    // Check if the result URL is identical to the model image URL (AI returned input unchanged)
+    if (resultImageUrl_replicate === modelImageUrl) {
+      console.error('[process-tryon] ⚠️ Result URL is identical to model image URL — AI likely failed to apply clothing')
+      await serviceClient.rpc('refund_gems_atomic', { p_user_id: userId, p_amount: gemsRequired, p_tryon_id: null })
+      return new Response(JSON.stringify({
+        error: 'UNCHANGED_RESULT',
+        message: 'AI không thay đổi được trang phục lần này. Gems đã hoàn lại — hãy thử lại hoặc dùng ảnh khác nhé~ 💪'
+      }), { status: 422, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
+
+    // Also check if result matches any of the clothing image URLs (returned clothing instead of dressed person)
+    if (clothingImageUrls.includes(resultImageUrl_replicate)) {
+      console.error('[process-tryon] ⚠️ Result URL matches a clothing image URL — wrong output extracted')
+      await serviceClient.rpc('refund_gems_atomic', { p_user_id: userId, p_amount: gemsRequired, p_tryon_id: null })
+      return new Response(JSON.stringify({
+        error: 'UNCHANGED_RESULT',
+        message: 'AI trả về sai kết quả. Gems đã hoàn lại — hãy thử lại nhé~ 💪'
+      }), { status: 422, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
     let resultImageUrl: string
     try {
       resultImageUrl = await uploadUrlToStorage(serviceClient, userId, resultImageUrl_replicate, 'results')
