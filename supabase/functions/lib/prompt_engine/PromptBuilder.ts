@@ -31,7 +31,7 @@ const PROMPT_BLOCKS: PromptBlock[] = [
         id: 'CORE_OUTPUT_FORMAT',
         category: 'CORE_DIRECTIVE',
         priority: 99,
-        content: `Output a SINGLE clean photo. No collage, no side-by-side, no before/after, no text, no labels, no watermarks, no borders. Only one person visible.`,
+        content: `OUTPUT MUST BE EXACTLY ONE PHOTO OF EXACTLY ONE PERSON. ❌ ABSOLUTELY FORBIDDEN: collage, side-by-side, before/after, split-screen, two-person composition, text, labels, watermarks, borders. ❌ NEVER show the clothing model alongside or next to the target person. If your output contains more than one person → you have FAILED → redo with only the target person visible.`,
     },
     {
         id: 'CORE_GARMENT_FIDELITY',

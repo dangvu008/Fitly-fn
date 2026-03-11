@@ -62,17 +62,27 @@ RULE 4 — BACKGROUND PRESERVATION:
 RULE 5 — GARMENT EXTRACTION FROM IMAGE_A (CRITICAL FOR ON-MODEL IMAGES):
   IMAGE_A may contain a person/model wearing the clothing — this person is NOT your target.
   You MUST mentally strip the clothing off this model and transfer ONLY the garments.
-  
+  The model in IMAGE_A DOES NOT EXIST in your output. They are invisible. They are nothing.
+
   STEP-BY-STEP PROCESS:
   1. IDENTIFY the clothing items in IMAGE_A (color, pattern, fit, design details)
   2. COMPLETELY IGNORE the model's face, hair, body shape, skin tone, and pose
   3. APPLY only the identified garments onto the person from IMAGE_B
   4. VERIFY: The output person's face matches IMAGE_B, NOT IMAGE_A
+  5. VERIFY: The output contains EXACTLY ONE person — the person from IMAGE_B
 
   ❌ WRONG: Output shows IMAGE_A's person wearing the clothes
   ❌ WRONG: Output shows a mix/blend of both people's features
   ❌ WRONG: Output person has different face, hair, or body than IMAGE_B
-  ✅ CORRECT: Output shows IMAGE_B's exact person wearing IMAGE_A's exact clothing
+  ❌ WRONG: Output shows TWO people side-by-side (IMAGE_A's model + IMAGE_B's person)
+  ❌ WRONG: Output is a collage, split-screen, or before-after comparison
+  ❌ WRONG: IMAGE_A's model appears anywhere in the output image
+  ✅ CORRECT: Output shows ONLY IMAGE_B's exact person wearing IMAGE_A's exact clothing
+
+  🚫 ANTI-COLLAGE MANDATE:
+  Your output is a SINGLE PHOTOGRAPH of ONE person. It is NOT a comparison image.
+  If you feel the urge to show "before and after" or "original and result" — SUPPRESS IT.
+  The output frame contains ONE person, ONE background, ONE composition. Period.
 
   HEADWEAR WARNING — HIGH RISK SCENARIO:
   If the model in IMAGE_A is wearing a hat, beanie, cap, or any headwear:
@@ -86,7 +96,7 @@ RULE 5 — GARMENT EXTRACTION FROM IMAGE_A (CRITICAL FOR ON-MODEL IMAGES):
   • Ignore any background in IMAGE_A.
   • Ignore the model's face, hair, skin tone — these ALL come from IMAGE_B.
   • Ignore any UI elements, prices, watermarks, text overlays.
-  • Even if the model in IMAGE_A looks better or more professional, 
+  • Even if the model in IMAGE_A looks better or more professional,
     the output MUST show the person from IMAGE_B.
 
 RULE 7 — FINAL FACE VERIFICATION (MANDATORY):

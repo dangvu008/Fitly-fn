@@ -148,3 +148,37 @@ Deno.test({
         console.log("✅ G5: GARMENT_REPLACEMENT_RULE distinguishes outerwear from regular garments");
     },
 });
+
+/**
+ * G6: BASE_PROMPT contains anti-collage mandate in RULE 5
+ */
+Deno.test({
+    name: "G6: BASE_PROMPT RULE 5 contains anti-collage and garment extraction rules",
+    fn: () => {
+        // Anti-collage in RULE 5
+        assertStringIncludes(BASE_PROMPT, "ANTI-COLLAGE MANDATE");
+        assertStringIncludes(BASE_PROMPT, "SINGLE PHOTOGRAPH");
+        assertStringIncludes(BASE_PROMPT, "ONE person");
+
+        // Strong garment extraction language
+        assertStringIncludes(BASE_PROMPT, "DOES NOT EXIST in your output");
+        assertStringIncludes(BASE_PROMPT, "ERASE");
+
+        // Explicit forbidden outputs
+        assertStringIncludes(BASE_PROMPT, "TWO people side-by-side");
+
+        console.log("✅ G6: BASE_PROMPT contains anti-collage mandate in RULE 5");
+    },
+});
+
+/**
+ * G7: BASE_PROMPT RULE 5 verification includes single-person check
+ */
+Deno.test({
+    name: "G7: BASE_PROMPT RULE 5 verification step checks for single person output",
+    fn: () => {
+        assertStringIncludes(BASE_PROMPT, "VERIFY: The output contains EXACTLY ONE person");
+
+        console.log("✅ G7: RULE 5 verification includes single-person check");
+    },
+});
