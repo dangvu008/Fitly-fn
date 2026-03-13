@@ -13,6 +13,7 @@ import { createContextMenus, handleContextTryonImage, handleContextAddWardrobe }
 import { handleMessage } from './background/message_routing.js';
 import { updateCachedAuthState, restoreSupabaseSession, getAuthToken } from './background/auth_state_manager.js';
 import { syncFromCloud, startAutoSync, stopAutoSync } from './background/cloud_sync.js';
+import { proactiveTokenRefresh, startProactiveRefreshTimer } from './background/auth_handlers.js';
 import { supabase } from './extension/config.js';
 import { markSessionReady } from './background/session_ready_gate.js';
 
@@ -158,6 +159,18 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 
 // ==========================================
+// ALARM-BASED PROACTIVE TOKEN REFRESH
+// ==========================================
+// chrome.alarms survive SW restarts — unlike setInterval which dies when SW is killed.
+// This ensures tokens stay fresh even during idle periods.
+chrome.alarms.onAlarm.addListener(async (alarm) => {
+    if (alarm.name === 'fitly-token-refresh') {
+        console.log('[SW] Token refresh alarm fired');
+        await proactiveTokenRefresh();
+    }
+});
+
+// ==========================================
 // STARTUP LOGIC
 // ==========================================
 
@@ -186,6 +199,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const token = await getAuthToken();
     if (token) {
         startAutoSync();
+        startProactiveRefreshTimer();
 
         // Initial sync from cloud (delay một chút để tránh block startup)
         setTimeout(async () => {
